@@ -1,7 +1,7 @@
 // Функции для работы с услугами
 async function loadServices() {
     try {
-        const response = await makeAuthRequest('/api/services');
+        const response = await makeAuthRequest('/admin/api/services');
         if (response.ok) {
             const services = await response.json();
             renderServices(services);
@@ -54,7 +54,7 @@ async function handleServiceCreate(e) {
 
 async function editService(id) {
     try {
-        const response = await makeAuthRequest(`/api/services/${id}`);
+        const response = await makeAuthRequest(`/admin/api/services/${id}`);
         if (response.ok) {
             const service = await response.json();
             showEditModal('service', service);

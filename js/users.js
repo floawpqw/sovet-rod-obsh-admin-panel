@@ -1,7 +1,7 @@
 // Функции для работы с пользователями
 async function loadUsers() {
     try {
-        const response = await makeAuthRequest('/api/users');
+        const response = await makeAuthRequest('/admin/api/users');
         if (response.ok) {
             const users = await response.json();
             renderUsers(users);
@@ -57,7 +57,7 @@ async function toggleUserStatus(id, currentStatus) {
 
 async function editUser(id) {
     try {
-        const response = await makeAuthRequest(`/api/users/${id}`);
+        const response = await makeAuthRequest(`/admin/api/users/${id}`);
         if (response.ok) {
             const user = await response.json();
             showEditModal('user', user);

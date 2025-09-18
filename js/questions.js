@@ -1,7 +1,7 @@
 // Функции для работы с вопросами
 async function loadQuestions() {
     try {
-        const response = await makeAuthRequest('/api/questions');
+        const response = await makeAuthRequest('/admin/api/questions');
         if (response.ok) {
             const questions = await response.json();
             renderQuestions(questions);
@@ -42,7 +42,7 @@ async function answerQuestion(id) {
     if (!answer) return;
     
     try {
-        const response = await makeAuthRequest(`/api/questions/${id}/answer`, {
+        const response = await makeAuthRequest(`/admin/api/questions/${id}/answer`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ async function answerQuestion(id) {
 
 async function markQuestionUnanswered(id) {
     try {
-        const response = await makeAuthRequest(`/api/questions/${id}/unanswer`, {
+        const response = await makeAuthRequest(`/admin/api/questions/${id}/unanswer`, {
             method: 'POST'
         });
         

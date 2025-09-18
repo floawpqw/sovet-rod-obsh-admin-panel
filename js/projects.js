@@ -1,7 +1,7 @@
 // Функции для работы с проектами
 async function loadProjects() {
     try {
-        const response = await makeAuthRequest('/api/projects');
+        const response = await makeAuthRequest('/admin/api/projects');
         if (response.ok) {
             const projects = await response.json();
             renderProjects(projects);
@@ -54,7 +54,7 @@ async function handleProjectCreate(e) {
 
 async function editProject(id) {
     try {
-        const response = await makeAuthRequest(`/api/projects/${id}`);
+        const response = await makeAuthRequest(`/admin/api/projects/${id}`);
         if (response.ok) {
             const project = await response.json();
             showEditModal('project', project);

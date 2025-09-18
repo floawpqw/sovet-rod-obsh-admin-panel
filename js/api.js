@@ -25,7 +25,7 @@ async function createItem(endpoint, data, type) {
     const originalText = showLoading(btn);
     
     try {
-        const response = await makeAuthRequest(`/api/${endpoint}`, {
+        const response = await makeAuthRequest(`/admin/api/${endpoint}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ async function createItemWithFile(endpoint, formData, type) {
     const originalText = showLoading(btn);
     
     try {
-        const response = await makeAuthRequest(`/api/${endpoint}`, {
+        const response = await makeAuthRequest(`/admin/api/${endpoint}`, {
             method: 'POST',
             body: formData
         });
@@ -83,7 +83,7 @@ async function deleteItem(endpoint, id, type) {
     if (!confirm(`Вы уверены, что хотите удалить этот ${getTypeName(type)}?`)) return false;
     
     try {
-        const response = await makeAuthRequest(`/api/${endpoint}/${id}`, {
+        const response = await makeAuthRequest(`/admin/api/${endpoint}/${id}`, {
             method: 'DELETE'
         });
         
@@ -103,7 +103,7 @@ async function deleteItem(endpoint, id, type) {
 
 async function toggleItemStatus(endpoint, id, currentStatus, type) {
     try {
-        const response = await makeAuthRequest(`/api/${endpoint}/${id}/toggle-status`, {
+        const response = await makeAuthRequest(`/admin/api/${endpoint}/${id}/toggle-status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 // Функции для работы с новостями
 async function loadNews() {
     try {
-        const response = await makeAuthRequest('/api/news');
+        const response = await makeAuthRequest('/admin/api/news');
         if (response.ok) {
             const news = await response.json();
             renderNews(news);
@@ -52,7 +52,7 @@ async function handleNewsCreate(e) {
 
 async function toggleNewsStatus(id, currentStatus) {
     try {
-        const response = await makeAuthRequest(`/api/news/${id}/toggle-status`, {
+        const response = await makeAuthRequest(`/admin/api/news/${id}/toggle-status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ async function toggleNewsStatus(id, currentStatus) {
 
 async function editNews(id) {
     try {
-        const response = await makeAuthRequest(`/api/news/${id}`);
+        const response = await makeAuthRequest(`/admin/api/news/${id}`);
         if (response.ok) {
             const news = await response.json();
             showEditModal('news', news);
