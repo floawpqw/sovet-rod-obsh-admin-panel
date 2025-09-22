@@ -1,13 +1,15 @@
 // Функции для работы с вопросами
 async function loadQuestions() {
     try {
-        const response = await makeAuthRequest('/admin/api/questions');
+        const response = await makeAuthRequest('/api/questions');
         if (response.ok) {
             const questions = await response.json();
             renderQuestions(questions);
+        } else {
+            showNotification('Ошибка загрузки вопросов', 'error');
         }
     } catch (error) {
-        showNotification('Ошибка загрузки вопросов', 'error');
+        showNotification('Ошибка загрузки вопросов: ' + error.message, 'error');
     }
 }
 
@@ -15,7 +17,7 @@ function renderQuestions(questions) {
     const container = document.getElementById('questions-list');
     if (!container) return;
     
-    if (questions.length === 0) {
+    if (!questions || questions.length === 0) {
         container.innerHTML = '<tr><td colspan="7" style="text-align: center;">Вопросов нет</td></tr>';
         return;
     }
@@ -42,7 +44,7 @@ async function answerQuestion(id) {
     if (!answer) return;
     
     try {
-        const response = await makeAuthRequest(`/admin/api/questions/${id}/answer`, {
+        const response = await makeAuthRequest(`/api/questions/${id}/answer`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,7 +63,7 @@ async function answerQuestion(id) {
 
 async function markQuestionUnanswered(id) {
     try {
-        const response = await makeAuthRequest(`/admin/api/questions/${id}/unanswer`, {
+        const response = await makeAuthRequest(`/api/questions/${id}/unanswer`, {
             method: 'POST'
         });
         

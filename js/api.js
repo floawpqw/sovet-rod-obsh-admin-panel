@@ -5,19 +5,24 @@ async function makeAuthRequest(url, options = {}) {
         ...options.headers
     };
     
-    const response = await fetch(`${API_BASE}${url}`, {
-        ...options,
-        headers
-    });
-    
-    if (response.status === 401) {
-        authToken = null;
-        localStorage.removeItem('authToken');
-        showAuthForm();
-        throw new Error('Требуется авторизация');
+    try {
+        const response = await fetch(`${API_BASE}${url}`, {
+            ...options,
+            headers
+        });
+        
+        if (response.status === 401) {
+            authToken = null;
+            localStorage.removeItem('authToken');
+            showAuthForm();
+            throw new Error('Требуется авторизация');
+        }
+        
+        return response;
+    } catch (error) {
+        console.error('API Request error:', error);
+        throw error;
     }
-    
-    return response;
 }
 
 async function createItem(endpoint, data, type) {
@@ -25,7 +30,7 @@ async function createItem(endpoint, data, type) {
     const originalText = showLoading(btn);
     
     try {
-        const response = await makeAuthRequest(`/admin/api/${endpoint}`, {
+        const response = await makeAuthRequest(`/api/${endpoint}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -39,12 +44,12 @@ async function createItem(endpoint, data, type) {
             refreshData(endpoint);
             return true;
         } else {
-            const errorData = await response.json();
-            showNotification(errorData.detail || 'Ошибка создания', 'error');
+            const errorData = await response.json().catch(() => ({}));
+            showNotification(errorData.detail || `Ошибка создания ${getTypeName(type)}`, 'error');
             return false;
         }
     } catch (error) {
-        showNotification('Ошибка: ' + error.message, 'error');
+        showNotification(`Ошибка: ${error.message}`, 'error');
         return false;
     } finally {
         hideLoading(btn, originalText);
@@ -56,7 +61,7 @@ async function createItemWithFile(endpoint, formData, type) {
     const originalText = showLoading(btn);
     
     try {
-        const response = await makeAuthRequest(`/admin/api/${endpoint}`, {
+        const response = await makeAuthRequest(`/api/${endpoint}`, {
             method: 'POST',
             body: formData
         });
@@ -67,12 +72,12 @@ async function createItemWithFile(endpoint, formData, type) {
             refreshData(endpoint);
             return true;
         } else {
-            const errorData = await response.json();
-            showNotification(errorData.detail || 'Ошибка создания', 'error');
+            const errorData = await response.json().catch(() => ({}));
+            showNotification(errorData.detail || `Ошибка создания ${getTypeName(type)}`, 'error');
             return false;
         }
     } catch (error) {
-        showNotification('Ошибка: ' + error.message, 'error');
+        showNotification(`Ошибка: ${error.message}`, 'error');
         return false;
     } finally {
         hideLoading(btn, originalText);
@@ -83,7 +88,7 @@ async function deleteItem(endpoint, id, type) {
     if (!confirm(`Вы уверены, что хотите удалить этот ${getTypeName(type)}?`)) return false;
     
     try {
-        const response = await makeAuthRequest(`/admin/api/${endpoint}/${id}`, {
+        const response = await makeAuthRequest(`/api/${endpoint}/${id}`, {
             method: 'DELETE'
         });
         
@@ -92,18 +97,18 @@ async function deleteItem(endpoint, id, type) {
             refreshData(endpoint);
             return true;
         } else {
-            showNotification('Ошибка удаления', 'error');
+            showNotification(`Ошибка удаления ${getTypeName(type)}`, 'error');
             return false;
         }
     } catch (error) {
-        showNotification('Ошибка: ' + error.message, 'error');
+        showNotification(`Ошибка: ${error.message}`, 'error');
         return false;
     }
 }
 
 async function toggleItemStatus(endpoint, id, currentStatus, type) {
     try {
-        const response = await makeAuthRequest(`/admin/api/${endpoint}/${id}/toggle-status`, {
+        const response = await makeAuthRequest(`/api/${endpoint}/${id}/toggle-status`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -115,6 +120,9 @@ async function toggleItemStatus(endpoint, id, currentStatus, type) {
             showNotification('Статус успешно изменен!');
             refreshData(endpoint);
             return true;
+        } else {
+            showNotification('Ошибка изменения статуса', 'error');
+            return false;
         }
     } catch (error) {
         showNotification('Ошибка изменения статуса', 'error');
@@ -124,13 +132,15 @@ async function toggleItemStatus(endpoint, id, currentStatus, type) {
 
 function refreshData(endpoint) {
     switch(endpoint) {
-        case 'users': loadUsers(); break;
-        case 'news': loadNews(); break;
-        case 'projects': loadProjects(); break;
-        case 'services': loadServices(); break;
-        case 'questions': loadQuestions(); break;
+        case 'users': typeof loadUsers === 'function' && loadUsers(); break;
+        case 'news': typeof loadNews === 'function' && loadNews(); break;
+        case 'projects': typeof loadProjects === 'function' && loadProjects(); break;
+        case 'banners': typeof loadBanners === 'function' && loadBanners(); break;
+        case 'partners': typeof loadPartners === 'function' && loadPartners(); break;
+        case 'polls': typeof loadPolls === 'function' && loadPolls(); break;
+        case 'questions': typeof loadQuestions === 'function' && loadQuestions(); break;
     }
-    loadSystemStats();
+    typeof loadSystemStats === 'function' && loadSystemStats();
 }
 
 // Глобальные функции

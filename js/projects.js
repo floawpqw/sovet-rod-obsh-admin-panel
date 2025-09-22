@@ -1,13 +1,15 @@
 // Функции для работы с проектами
 async function loadProjects() {
     try {
-        const response = await makeAuthRequest('/admin/api/projects');
+        const response = await makeAuthRequest('/api/projects');
         if (response.ok) {
             const projects = await response.json();
             renderProjects(projects);
+        } else {
+            showNotification('Ошибка загрузки проектов', 'error');
         }
     } catch (error) {
-        showNotification('Ошибка загрузки проектов', 'error');
+        showNotification('Ошибка загрузки проектов: ' + error.message, 'error');
     }
 }
 
@@ -15,7 +17,7 @@ function renderProjects(projects) {
     const container = document.getElementById('projects-list');
     if (!container) return;
     
-    if (projects.length === 0) {
+    if (!projects || projects.length === 0) {
         container.innerHTML = '<tr><td colspan="6" style="text-align: center;">Проектов нет</td></tr>';
         return;
     }
@@ -54,7 +56,7 @@ async function handleProjectCreate(e) {
 
 async function editProject(id) {
     try {
-        const response = await makeAuthRequest(`/admin/api/projects/${id}`);
+        const response = await makeAuthRequest(`/api/projects/${id}`);
         if (response.ok) {
             const project = await response.json();
             showEditModal('project', project);

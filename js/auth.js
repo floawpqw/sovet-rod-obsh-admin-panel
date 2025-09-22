@@ -2,8 +2,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     if (authToken) {
         showAdminPanel();
-        loadUsers();
-        loadSystemStats();
+        if (typeof loadUsers === 'function') loadUsers();
+        if (typeof loadSystemStats === 'function') loadSystemStats();
     } else {
         showAuthForm();
     }
@@ -23,7 +23,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         formData.append('username', username);
         formData.append('password', password);
         
-        const response = await fetch(`${API_BASE}/admin/api/auth/login`, {
+        const response = await fetch(`${API_BASE}/api/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -38,12 +38,14 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
                 authToken = data.access_token;
                 localStorage.setItem('authToken', authToken);
                 showAdminPanel();
-                loadUsers();
-                loadSystemStats();
+                if (typeof loadUsers === 'function') loadUsers();
+                if (typeof loadSystemStats === 'function') loadSystemStats();
                 showNotification('Успешный вход!', 'success', 'auth-notification');
+            } else {
+                showNotification('Токен не найден в ответе', 'error', 'auth-notification');
             }
         } else {
-            const errorData = await response.json();
+            const errorData = await response.json().catch(() => ({}));
             showNotification(errorData.detail || `Ошибка авторизации: ${response.status}`, 'error', 'auth-notification');
         }
     } catch (error) {

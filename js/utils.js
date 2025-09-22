@@ -7,16 +7,19 @@ let currentEditType = null;
 // Утилиты
 function showNotification(message, type = 'success', elementId = 'notification') {
     const notification = document.getElementById(elementId);
-    notification.textContent = message;
-    notification.className = `notification ${type}`;
-    notification.style.display = 'block';
-    
-    setTimeout(() => {
-        notification.style.display = 'none';
-    }, 3000);
+    if (notification) {
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
 }
 
 function showLoading(button) {
+    if (!button) return '';
     const originalText = button.innerHTML;
     button.innerHTML = '<div class="loading"></div>';
     button.disabled = true;
@@ -24,18 +27,27 @@ function showLoading(button) {
 }
 
 function hideLoading(button, originalText) {
+    if (!button) return;
     button.innerHTML = originalText;
     button.disabled = false;
 }
 
 function showAdminPanel() {
-    document.getElementById('auth-section').style.display = 'none';
-    document.getElementById('admin-section').style.display = 'block';
+    const authSection = document.getElementById('auth-section');
+    const adminSection = document.getElementById('admin-section');
+    if (authSection && adminSection) {
+        authSection.style.display = 'none';
+        adminSection.style.display = 'block';
+    }
 }
 
 function showAuthForm() {
-    document.getElementById('auth-section').style.display = 'block';
-    document.getElementById('admin-section').style.display = 'none';
+    const authSection = document.getElementById('auth-section');
+    const adminSection = document.getElementById('admin-section');
+    if (authSection && adminSection) {
+        authSection.style.display = 'block';
+        adminSection.style.display = 'none';
+    }
 }
 
 function getStatusClass(status) {
@@ -46,7 +58,9 @@ function getStatusClass(status) {
         'published': 'status-published',
         'draft': 'status-draft',
         'active': 'status-published',
-        'inactive': 'status-draft'
+        'inactive': 'status-draft',
+        'true': 'status-published',
+        'false': 'status-draft'
     };
     return classes[status] || 'status-draft';
 }
@@ -94,8 +108,11 @@ function getTypeName(type) {
         'user': 'пользователя',
         'news': 'новость',
         'project': 'проект',
-        'service': 'услугу',
-        'question': 'вопрос'
+        'banner': 'баннер',
+        'partner': 'партнера',
+        'poll': 'опрос',
+        'question': 'вопрос',
+        'service': 'услугу'
     };
     return names[type] || type;
 }
@@ -115,7 +132,48 @@ function toggleForm(type) {
             if (formElement) formElement.reset();
             
             const preview = document.getElementById(`${type}-image-preview`);
-            if (preview) preview.style.display = 'none';
+            if (preview) {
+                preview.style.display = 'none';
+                preview.src = '';
+            }
         }
     }
+}
+
+function getBannerPositionText(position) {
+    const positions = {
+        'top': 'Верх',
+        'middle': 'Середина',
+        'bottom': 'Низ',
+        'sidebar': 'Боковая панель'
+    };
+    return positions[position] || position;
+}
+
+function getPartnerTypeText(type) {
+    const types = {
+        'strategic': 'Стратегический',
+        'technical': 'Технический',
+        'marketing': 'Маркетинговый',
+        'general': 'Общий'
+    };
+    return types[type] || type;
+}
+
+function getPollStatusClass(status) {
+    const classes = {
+        'active': 'status-published',
+        'inactive': 'status-draft',
+        'completed': 'status-completed'
+    };
+    return classes[status] || 'status-draft';
+}
+
+function getPollStatusText(status) {
+    const texts = {
+        'active': 'Активен',
+        'inactive': 'Неактивен',
+        'completed': 'Завершен'
+    };
+    return texts[status] || status;
 }

@@ -1,13 +1,15 @@
 // Функции для работы с пользователями
 async function loadUsers() {
     try {
-        const response = await makeAuthRequest('/admin/api/users');
+        const response = await makeAuthRequest('/api/users');
         if (response.ok) {
             const users = await response.json();
             renderUsers(users);
+        } else {
+            showNotification('Ошибка загрузки пользователей', 'error');
         }
     } catch (error) {
-        showNotification('Ошибка загрузки пользователей', 'error');
+        showNotification('Ошибка загрузки пользователей: ' + error.message, 'error');
     }
 }
 
@@ -15,7 +17,7 @@ function renderUsers(users) {
     const container = document.getElementById('users-list');
     if (!container) return;
     
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
         container.innerHTML = '<tr><td colspan="7" style="text-align: center;">Пользователей нет</td></tr>';
         return;
     }
@@ -57,7 +59,7 @@ async function toggleUserStatus(id, currentStatus) {
 
 async function editUser(id) {
     try {
-        const response = await makeAuthRequest(`/admin/api/users/${id}`);
+        const response = await makeAuthRequest(`/api/users/${id}`);
         if (response.ok) {
             const user = await response.json();
             showEditModal('user', user);

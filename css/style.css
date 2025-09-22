@@ -12,12 +12,14 @@ body {
     background-color: var(--light-bg);
     color: var(--text-dark);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    overflow-x: hidden;
 }
 
 .admin-container {
@@ -66,6 +68,7 @@ input[type="password"],
 input[type="email"],
 input[type="file"],
 input[type="number"],
+input[type="datetime-local"],
 textarea,
 select {
     width: 100%;
@@ -136,24 +139,38 @@ button.warning:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+}
+
+.nav h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--text-light);
 }
 
 .nav-links {
     display: flex;
     list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .nav-links li {
-    margin-left: 20px;
+    margin: 0;
 }
 
 .nav-links a {
     color: var(--text-light);
     text-decoration: none;
     font-weight: 500;
-    padding: 5px 10px;
+    padding: 8px 12px;
     border-radius: 4px;
     transition: background-color 0.3s;
+    white-space: nowrap;
+    display: block;
+    font-size: 14px;
 }
 
 .nav-links a:hover,
@@ -165,6 +182,9 @@ button.warning:hover {
     background-color: transparent;
     border: 1px solid var(--text-light);
     color: var(--text-light);
+    padding: 8px 12px;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 .logout-btn:hover {
@@ -341,20 +361,84 @@ tr:hover {
     color: white;
 }
 
+/* Стили для опросов */
+.poll-option {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.poll-option input {
+    flex: 1;
+}
+
+.remove-option {
+    padding: 5px 10px;
+    font-size: 16px;
+}
+
+/* Стили для результатов опросов */
+.poll-results {
+    margin: 20px 0;
+}
+
+.poll-result-bar {
+    background: #f0f0f0;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 5px 0;
+}
+
+.poll-result-fill {
+    background: var(--primary-red);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.poll-result-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
 /* Адаптивность */
+@media (max-width: 1024px) {
+    .nav-links {
+        gap: 4px;
+    }
+    
+    .nav-links a,
+    .logout-btn {
+        padding: 6px 8px;
+        font-size: 13px;
+    }
+}
+
 @media (max-width: 768px) {
     .nav {
         flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .nav h1 {
+        margin-bottom: 15px;
+        align-self: center;
     }
     
     .nav-links {
-        margin-top: 15px;
-        flex-wrap: wrap;
+        width: 100%;
         justify-content: center;
+        gap: 6px;
+        margin-top: 0;
     }
     
-    .nav-links li {
-        margin: 5px;
+    .nav-links a,
+    .logout-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+        min-width: auto;
     }
     
     .actions {
@@ -368,5 +452,35 @@ tr:hover {
     .modal-content {
         width: 95%;
         margin: 10% auto;
+    }
+    
+    .poll-option {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .poll-option input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-links {
+        gap: 4px;
+    }
+    
+    .nav-links a,
+    .logout-btn {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    .admin-container {
+        padding: 20px;
+        margin-top: 20px;
     }
 }
