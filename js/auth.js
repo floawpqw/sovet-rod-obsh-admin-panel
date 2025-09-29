@@ -45,18 +45,35 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
                 showNotification('Токен не найден в ответе', 'error', 'auth-notification');
             }
         } else {
+            let userMessage = 'Ошибка авторизации';
+            if (response.status === 400 || response.status === 401) {
+                userMessage = 'Неверный логин или пароль';
+            } else if (response.status === 429) {
+                userMessage = 'Слишком много попыток. Попробуйте позже.';
+            }
             const errorData = await response.json().catch(() => ({}));
-            showNotification(errorData.detail || `Ошибка авторизации: ${response.status}`, 'error', 'auth-notification');
+            const detailed = errorData && (errorData.detail || errorData.message);
+            showNotification(detailed || userMessage, 'error', 'auth-notification');
         }
     } catch (error) {
-        showNotification('Ошибка сети: ' + error.message, 'error', 'auth-notification');
+        // Сетевые ошибки (включая "Failed to fetch") показываем дружелюбно
+        showNotification('Не удалось связаться с сервером. Проверьте подключение и попробуйте снова.', 'error', 'auth-notification');
     } finally {
         hideLoading(loginBtn, originalText);
     }
 });
 
-document.getElementById('logout-btn').addEventListener('click', () => {
-    authToken = null;
-    localStorage.removeItem('authToken');
-    showAuthForm();
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    try {
+        if (typeof apiLogout === 'function') {
+            await apiLogout();
+        }
+    } catch (_) {
+        // Игнорируем ошибку логаута, продолжаем локальный выход
+    } finally {
+        authToken = null;
+        localStorage.removeItem('authToken');
+        showAuthForm();
+        showNotification('Вы вышли из системы', 'success');
+    }
 });

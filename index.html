@@ -56,42 +56,17 @@
             <section id="users" class="content-section active">
                 <h2>Управление пользователями</h2>
                 
-                <button id="toggle-user-form" class="toggle-form-btn">+ Добавить пользователя</button>
+                <button id="toggle-user-form" class="toggle-form-btn">+ Пригласить пользователя</button>
                 
                 <div id="user-form" class="add-form" style="display: none;">
-                    <h3>Добавить нового пользователя</h3>
-                    <form id="user-create-form">
+                    <h3>Отправить приглашение на регистрацию</h3>
+                    <form id="user-invite-form">
                         <div class="form-group">
-                            <label for="user-email">Email *</label>
-                            <input type="email" id="user-email" required placeholder="user@example.com">
+                            <label for="invite-email">Email для приглашения *</label>
+                            <input type="email" id="invite-email" required placeholder="user@example.com">
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="user-username">Логин *</label>
-                            <input type="text" id="user-username" required placeholder="username">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="user-password">Пароль *</label>
-                            <input type="password" id="user-password" required placeholder="Минимум 6 символов">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="user-name">Имя</label>
-                            <input type="text" id="user-name" placeholder="Полное имя">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="user-role">Роль</label>
-                            <select id="user-role">
-                                <option value="user">Пользователь</option>
-                                <option value="admin">Администратор</option>
-                                <option value="moderator">Модератор</option>
-                            </select>
-                        </div>
-                        
                         <div class="form-actions">
-                            <button type="submit" id="user-submit-btn">Создать пользователя</button>
+                            <button type="submit" id="user-submit-btn">Отправить приглашение</button>
                             <button type="button" id="cancel-user-btn" class="secondary">Отмена</button>
                         </div>
                     </form>
@@ -133,7 +108,8 @@
                         
                         <div class="form-group">
                             <label for="news-content">Содержание *</label>
-                            <textarea id="news-content" required placeholder="Введите содержание новости"></textarea>
+                            <textarea id="news-content" required placeholder="Вставьте HTML-блок, например: <div>...</div>"></textarea>
+                            <small>Важно: в это поле необходимо вставить HTML-блок (например, <code>&lt;div&gt;...&lt;/div&gt;</code>). Этот блок будет внедрён на основной сайт без изменений.</small>
                         </div>
                         
                         <div class="form-group">
@@ -189,18 +165,38 @@
                     <h3>Добавить новый проект</h3>
                     <form id="project-create-form">
                         <div class="form-group">
-                            <label for="project-title">Название проекта *</label>
-                            <input type="text" id="project-title" required placeholder="Введите название проекта">
+                            <label for="project-title">Заголовок *</label>
+                            <input type="text" id="project-title" required placeholder="Введите заголовок проекта">
                         </div>
                         
                         <div class="form-group">
-                            <label for="project-description">Описание *</label>
-                            <textarea id="project-description" required placeholder="Опишите проект"></textarea>
+                            <label for="project-content">Содержание (HTML-блок) *</label>
+                            <textarea id="project-content" required placeholder="Вставьте HTML-блок, например: &lt;div&gt;...&lt;/div&gt;"></textarea>
+                            <small>Важно: в это поле необходимо вставить HTML-блок (например, <code>&lt;div&gt;...&lt;/div&gt;</code>). Этот блок будет внедрён на основной сайт без изменений.</small>
                         </div>
                         
                         <div class="form-group">
-                            <label for="project-image">Изображение проекта</label>
-                            <input type="file" id="project-image" accept="image/*">
+                            <label>Активен *</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="project-active" value="true" required> Да</label>
+                                <label><input type="radio" name="project-active" value="false" required> Нет</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-keywords">Ключевые слова (список) *</label>
+                            <input type="text" id="project-keywords" required placeholder="например: образование, воспитание, школа">
+                            <small>Введите список ключевых слов через запятую. При отправке каждое слово передаётся как отдельный элемент списка.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-teaser">Минимальный текст для главной страницы *</label>
+                            <textarea id="project-teaser" required placeholder="Краткое описание проекта для главной страницы"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-image">Изображение *</label>
+                            <input type="file" id="project-image" accept="image/*" required>
                             <div class="image-preview-container">
                                 <div class="preview-title">Предпросмотр:</div>
                                 <img id="project-image-preview" class="image-preview" alt="Предпросмотр изображения">
@@ -208,27 +204,29 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="project-link">Ссылка на проект</label>
-                            <input type="text" id="project-link" placeholder="https://example.com">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="project-tech">Технологии</label>
-                            <input type="text" id="project-tech" placeholder="React, Node.js, MongoDB">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="project-status">Статус</label>
-                            <select id="project-status">
-                                <option value="completed">Завершен</option>
-                                <option value="in_progress">В разработке</option>
-                                <option value="planned">Запланирован</option>
+                            <label for="project-theme">Тематика проекта *</label>
+                            <select id="project-theme" required>
+                                <option value="">Не выбрано</option>
+                                <option value="education">Образование</option>
+                                <option value="upbringing">Воспитание</option>
+                                <option value="culture">Культура</option>
+                                <option value="sport">Спорт</option>
+                                <option value="health">Здоровье</option>
+                                <option value="other">Другое</option>
                             </select>
                         </div>
                         
                         <div class="form-group">
-                            <label for="project-category">Категория</label>
-                            <input type="text" id="project-category" placeholder="Веб-разработка, Дизайн">
+                            <label for="project-category">Категория *</label>
+                            <select id="project-category" required>
+                                <option value="">Не выбрано</option>
+                                <option value="parents">Для родителей</option>
+                                <option value="teachers">Для учителей</option>
+                                <option value="students">Для учеников</option>
+                                <option value="administration">Для администрации</option>
+                                <option value="community">Для сообщества</option>
+                                <option value="other">Прочее</option>
+                            </select>
                         </div>
                         
                         <div class="form-actions">
@@ -866,4 +864,5 @@
     <script src="js/settings.js"></script>
     <script src="js/main.js"></script>
 </body>
+</html>
 </html>

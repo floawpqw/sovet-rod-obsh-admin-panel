@@ -35,11 +35,11 @@ function initForms() {
     // Форма пользователя
     const toggleUserForm = document.getElementById('toggle-user-form');
     const cancelUserBtn = document.getElementById('cancel-user-btn');
-    const userCreateForm = document.getElementById('user-create-form');
+    const userInviteForm = document.getElementById('user-invite-form');
     
     if (toggleUserForm) toggleUserForm.addEventListener('click', () => toggleForm('user'));
     if (cancelUserBtn) cancelUserBtn.addEventListener('click', () => toggleForm('user'));
-    if (userCreateForm) userCreateForm.addEventListener('submit', handleUserCreate);
+    if (userInviteForm) userInviteForm.addEventListener('submit', handleUserInvite);
     
     // Форма новостей
     const toggleNewsForm = document.getElementById('toggle-news-form');

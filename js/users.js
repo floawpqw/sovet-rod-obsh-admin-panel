@@ -39,18 +39,29 @@ function renderUsers(users) {
     `).join('');
 }
 
-async function handleUserCreate(e) {
+async function handleUserInvite(e) {
     e.preventDefault();
-    
-    const formData = {
-        email: document.getElementById('user-email').value,
-        username: document.getElementById('user-username').value,
-        password: document.getElementById('user-password').value,
-        name: document.getElementById('user-name').value,
-        role: document.getElementById('user-role').value
-    };
-    
-    await createItem('users', formData, 'user');
+    const btn = document.getElementById('user-submit-btn');
+    const originalText = showLoading(btn);
+    try {
+        const email = document.getElementById('invite-email').value;
+        const response = await makeAuthRequest('/api/auth/send-register-invitation/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        if (response.ok) {
+            showNotification('Приглашение отправлено!', 'success');
+            toggleForm('user');
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            showNotification(errorData.detail || 'Не удалось отправить приглашение', 'error');
+        }
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message, 'error');
+    } finally {
+        hideLoading(btn, originalText);
+    }
 }
 
 async function toggleUserStatus(id, currentStatus) {

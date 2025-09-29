@@ -41,9 +41,17 @@ function renderNews(news) {
 async function handleNewsCreate(e) {
     e.preventDefault();
     
+    // Валидация: содержание должно быть HTML-блоком (например, <div>...)</div>)
+    const contentValue = document.getElementById('news-content').value.trim();
+    const looksLikeHtmlBlock = /^<([a-zA-Z][\w:-]*)\b[\s\S]*<\/\1>\s*$/m.test(contentValue);
+    if (!looksLikeHtmlBlock) {
+        showNotification('Поле "Содержание" должно содержать валидный HTML-блок, например <div>...</div>.', 'error');
+        return;
+    }
+
     const formData = new FormData();
     formData.append('title', document.getElementById('news-title').value);
-    formData.append('content', document.getElementById('news-content').value);
+    formData.append('content', contentValue);
     formData.append('status', document.getElementById('news-status').value);
     
     const imageFile = document.getElementById('news-image').files[0];

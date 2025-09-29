@@ -25,6 +25,17 @@ async function makeAuthRequest(url, options = {}) {
     }
 }
 
+// Выход из системы на стороне API
+async function apiLogout() {
+    try {
+        const response = await makeAuthRequest('/api/auth/logout', { method: 'POST' });
+        // Даже если сервер вернул не 2xx, локально мы все равно завершим выход
+        return response.ok;
+    } catch (_) {
+        return false;
+    }
+}
+
 async function createItem(endpoint, data, type) {
     const btn = document.getElementById(`${type}-submit-btn`);
     const originalText = showLoading(btn);
@@ -146,3 +157,4 @@ function refreshData(endpoint) {
 // Глобальные функции
 window.deleteItem = deleteItem;
 window.toggleItemStatus = toggleItemStatus;
+window.apiLogout = apiLogout;

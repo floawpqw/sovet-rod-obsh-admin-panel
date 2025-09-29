@@ -40,17 +40,51 @@ function renderProjects(projects) {
 async function handleProjectCreate(e) {
     e.preventDefault();
     
+    // Считывание и валидация полей
+    const title = (document.getElementById('project-title')?.value || '').trim();
+    const content = (document.getElementById('project-content')?.value || '').trim();
+    const teaser = (document.getElementById('project-teaser')?.value || '').trim();
+    const theme = document.getElementById('project-theme')?.value || '';
+    const category = document.getElementById('project-category')?.value || '';
+    const activeEl = document.querySelector('input[name="project-active"]:checked');
+    const keywordsRaw = (document.getElementById('project-keywords')?.value || '').trim();
+    const imageFile = document.getElementById('project-image')?.files?.[0];
+
+    if (!title || !content || !teaser || !theme || !category || !activeEl || !keywordsRaw || !imageFile) {
+        showNotification('Заполните все обязательные поля, включая изображение и активность.', 'error');
+        return;
+    }
+
+    // Проверка, что "Содержание" содержит HTML-блок (предпочтительно <div>)
+    const template = document.createElement('template');
+    template.innerHTML = content.trim();
+    const hasElementNode = Array.from(template.content.childNodes).some(n => n.nodeType === 1);
+    const hasDiv = template.content.querySelector('div') !== null;
+    if (!hasElementNode) {
+        showNotification('Поле «Содержание» должно содержать HTML-блок (например, <div>...</div>).', 'error');
+        return;
+    }
+    if (!hasDiv) {
+        showNotification('Рекомендуется использовать корневой <div> в поле «Содержание».', 'warning');
+    }
+
+    // Ключевые слова как список (через форму, не JSON)
+    const keywords = keywordsRaw.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    if (keywords.length === 0) {
+        showNotification('Укажите хотя бы одно ключевое слово.', 'error');
+        return;
+    }
+
     const formData = new FormData();
-    formData.append('title', document.getElementById('project-title').value);
-    formData.append('description', document.getElementById('project-description').value);
-    formData.append('link', document.getElementById('project-link').value || '');
-    formData.append('technologies', document.getElementById('project-tech').value || '');
-    formData.append('status', document.getElementById('project-status').value);
-    formData.append('category', document.getElementById('project-category').value || '');
-    
-    const imageFile = document.getElementById('project-image').files[0];
-    if (imageFile) formData.append('image', imageFile);
-    
+    formData.append('title', title);
+    formData.append('content', content);
+    formData.append('active', activeEl.value);
+    formData.append('teaser', teaser);
+    formData.append('theme', theme);
+    formData.append('category', category);
+    keywords.forEach(kw => formData.append('keywords[]', kw));
+    formData.append('image', imageFile);
+
     await createItemWithFile('projects', formData, 'project');
 }
 
