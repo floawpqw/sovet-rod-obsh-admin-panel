@@ -150,8 +150,9 @@ function refreshData(endpoint) {
         case 'partners': typeof loadPartners === 'function' && loadPartners(); break;
         case 'polls': typeof loadPolls === 'function' && loadPolls(); break;
         case 'questions': typeof loadQuestions === 'function' && loadQuestions(); break;
+        case 'feedbacks': typeof loadQuestions === 'function' && loadQuestions(); break;
     }
-    typeof loadSystemStats === 'function' && loadSystemStats();
+    // Статистика удалена вместе с настройками
 }
 
 // Глобальные функции

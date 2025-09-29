@@ -41,8 +41,8 @@
                         <li><a href="#subscriptions" class="nav-link">Подписки</a></li>
                         <li><a href="#documents" class="nav-link">Документы</a></li>
                         <li><a href="#contacts" class="nav-link">Контакты</a></li>
+                        <li><a href="#events" class="nav-link">Мероприятия</a></li>
                         <li><a href="#questions" class="nav-link">Вопросы</a></li>
-                        <li><a href="#settings" class="nav-link">Настройки</a></li>
                         <li><button id="logout-btn" class="logout-btn">Выйти</button></li>
                     </ul>
                 </nav>
@@ -729,113 +729,44 @@
                         <tr>
                             <th>ID</th>
                             <th>Имя</th>
+                            <th>Фамилия</th>
+                            <th>Отчество</th>
                             <th>Email</th>
                             <th>Вопрос</th>
                             <th>Статус</th>
+                            <th>Ответ</th>
                             <th>Дата</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody id="questions-list">
                         <tr>
-                            <td colspan="7" style="text-align: center;">Загрузка вопросов...</td>
+                            <td colspan="10" style="text-align: center;">Загрузка вопросов...</td>
                         </tr>
                     </tbody>
                 </table>
             </section>
 
-            <!-- Секция настроек -->
-            <section id="settings" class="content-section">
-                <h2>Настройки системы</h2>
+            <!-- Секция мероприятий -->
+            <section id="events" class="content-section">
+                <h2>Мероприятия</h2>
                 
-                <div class="add-form">
-                    <h3>Общие настройки</h3>
-                    <form id="settings-form">
-                        <div class="form-group">
-                            <label for="site-title">Название сайта</label>
-                            <input type="text" id="site-title" placeholder="Название вашего сайта">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="site-description">Описание сайта</label>
-                            <textarea id="site-description" placeholder="Краткое описание вашего сайта"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="admin-email">Email администратора</label>
-                            <input type="email" id="admin-email" placeholder="admin@example.com">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="site-logo">Логотип сайта</label>
-                            <input type="file" id="site-logo" accept="image/*">
-                            <div class="image-preview-container">
-                                <div class="preview-title">Предпросмотр:</div>
-                                <img id="site-logo-preview" class="image-preview" alt="Предпросмотр логотипа">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="maintenance-mode">Режим обслуживания</label>
-                            <select id="maintenance-mode">
-                                <option value="false">Выключен</option>
-                                <option value="true">Включен</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="submit" id="settings-submit-btn">Сохранить настройки</button>
-                        </div>
-                    </form>
-                </div>
-                
-                <div class="add-form">
-                    <h3>Статистика системы</h3>
-                    <div id="system-stats">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Пользователи</h4>
-                                <p id="stats-users" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Новости</h4>
-                                <p id="stats-news" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Проекты</h4>
-                                <p id="stats-projects" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Баннеры</h4>
-                                <p id="stats-banners" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Партнеры</h4>
-                                <p id="stats-partners" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Опросы</h4>
-                                <p id="stats-polls" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Подписки</h4>
-                                <p id="stats-subscriptions" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Документы</h4>
-                                <p id="stats-documents" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Контакты</h4>
-                                <p id="stats-contacts" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-                                <h4>Вопросы</h4>
-                                <p id="stats-questions" style="font-size: 24px; font-weight: bold; color: var(--primary-red);">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-list">
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Загрузка мероприятий...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </section>
         </div>
     </div>
@@ -861,7 +792,7 @@
     <script src="js/documents.js"></script>
     <script src="js/contacts.js"></script>
     <script src="js/questions.js"></script>
-    <script src="js/settings.js"></script>
+    <script src="js/events.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
