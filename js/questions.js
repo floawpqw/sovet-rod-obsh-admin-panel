@@ -1,7 +1,7 @@
 // Функции для работы с вопросами
 async function loadQuestions() {
     try {
-        const response = await makeAuthRequest('/api/questions');
+        const response = await makeAuthRequest('/api/feedbacks/');
         if (response.ok) {
             const questions = await response.json();
             renderQuestions(questions);
@@ -18,38 +18,53 @@ function renderQuestions(questions) {
     if (!container) return;
     
     if (!questions || questions.length === 0) {
-        container.innerHTML = '<tr><td colspan="7" style="text-align: center;">Вопросов нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="10" style="text-align: center;">Вопросов нет</td></tr>';
         return;
     }
     
-    container.innerHTML = questions.map(question => `
+    container.innerHTML = questions.map(question => {
+        const firstName = question.first_name || question.name || '';
+        const lastName = question.last_name || question.surname || '';
+        const middleName = question.patronymic || question.middle_name || '';
+        const email = question.email || '';
+        const message = (question.message || question.text || '').toString();
+        const answer = question.answer || '';
+        const createdAt = question.created_at || question.createdAt || question.created || null;
+        const dateStr = createdAt ? new Date(createdAt).toLocaleDateString() : '';
+        const shortMessage = message ? `${message.substring(0, 50)}${message.length > 50 ? '...' : ''}` : '';
+        const canEmail = Boolean(email);
+        return `
         <tr>
             <td>${question.id}</td>
-            <td>${question.name}</td>
-            <td>${question.email}</td>
-            <td>${question.message.substring(0, 50)}${question.message.length > 50 ? '...' : ''}</td>
+            <td>${firstName}</td>
+            <td>${lastName}</td>
+            <td>${middleName}</td>
+            <td>${email}</td>
+            <td title="${message.replace(/"/g, '&quot;')}">${shortMessage}</td>
             <td><span class="status-badge ${question.answered ? 'status-published' : 'status-draft'}">${question.answered ? 'Отвечен' : 'Ожидает'}</span></td>
-            <td>${new Date(question.created_at).toLocaleDateString()}</td>
+            <td title="${String(answer).replace(/"/g, '&quot;')}">${answer ? `${String(answer).substring(0, 40)}${String(answer).length > 40 ? '...' : ''}` : ''}</td>
+            <td>${dateStr}</td>
             <td class="actions">
-                <button class="action-btn" onclick="answerQuestion(${question.id})">Ответить</button>
-                <button class="action-btn danger" onclick="deleteItem('questions', ${question.id}, 'question')">Удалить</button>
-                ${question.answered ? `<button class="action-btn warning" onclick="markQuestionUnanswered(${question.id})">Отменить ответ</button>` : ''}
+                <button class="action-btn" onclick="answerQuestion(${question.id}, ${canEmail})">Ответить</button>
+                <button class="action-btn danger" onclick="deleteItem('feedbacks', ${question.id}, 'question')">Удалить</button>
+                ${question.answered ? `<button class=\"action-btn warning\" onclick=\"markQuestionUnanswered(${question.id})\">Отменить ответ</button>` : ''}
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
 }
 
-async function answerQuestion(id) {
+async function answerQuestion(id, canEmail = false) {
     const answer = prompt('Введите ответ на вопрос:');
     if (!answer) return;
     
     try {
-        const response = await makeAuthRequest(`/api/questions/${id}/answer`, {
+        const sendEmail = canEmail ? confirm('Отправить ответ на email пользователя?') : false;
+        const response = await makeAuthRequest(`/api/feedbacks/${id}/answer`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ answer })
+            body: JSON.stringify({ answer, send_email: sendEmail })
         });
         
         if (response.ok) {
@@ -63,7 +78,7 @@ async function answerQuestion(id) {
 
 async function markQuestionUnanswered(id) {
     try {
-        const response = await makeAuthRequest(`/api/questions/${id}/unanswer`, {
+        const response = await makeAuthRequest(`/api/feedbacks/${id}/unanswer`, {
             method: 'POST'
         });
         
