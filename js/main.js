@@ -93,10 +93,7 @@ function initForms() {
     // Инициализация формы опросов
     initPollForm();
     
-    // Форма настроек
-    const settingsForm = document.getElementById('settings-form');
-    if (settingsForm) settingsForm.addEventListener('submit', handleSettingsSave);
-    initImagePreview('site-logo', 'site-logo-preview');
+    // Удалены настройки
 
         // Форма подписок
         const toggleSubscriptionForm = document.getElementById('toggle-subscription-form');
@@ -154,7 +151,7 @@ function handleNavigation(link) {
                 case 'documents': loadDocuments(); break;
                 case 'contacts': loadContacts(); break;
                 case 'questions': loadQuestions(); break;
-                case 'settings': loadSettings(); loadSystemStats(); break;
+                case 'events': loadEvents(); break;
         }
     }
 }

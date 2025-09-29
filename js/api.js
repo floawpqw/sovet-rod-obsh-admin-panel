@@ -152,7 +152,7 @@ function refreshData(endpoint) {
         case 'questions': typeof loadQuestions === 'function' && loadQuestions(); break;
         case 'feedbacks': typeof loadQuestions === 'function' && loadQuestions(); break;
     }
-    typeof loadSystemStats === 'function' && loadSystemStats();
+    // Статистика удалена вместе с настройками
 }
 
 // Глобальные функции
