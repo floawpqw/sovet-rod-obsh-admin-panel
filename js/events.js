@@ -24,10 +24,10 @@ function renderEvents(events) {
     
     container.innerHTML = events.map(eventItem => {
         const id = eventItem.id;
-        const title = eventItem.title || eventItem.name || '';
-        const dateRaw = eventItem.date || eventItem.start_date || eventItem.starts_at || eventItem.datetime || null;
+        const title = eventItem.title || '';
+        const dateRaw = eventItem.event_date || null;
         const dateStr = dateRaw ? new Date(dateRaw).toLocaleString() : '';
-        const status = eventItem.status || (eventItem.active ? 'active' : '') || '';
+        const status = eventItem.is_active ? 'active' : '';
         return `
         <tr>
             <td>${id}</td>
@@ -35,7 +35,7 @@ function renderEvents(events) {
             <td>${dateStr}</td>
             <td>${status}</td>
             <td class="actions">
-                <button class="action-btn danger" onclick="deleteItem('events', ${id}, 'event')">Удалить</button>
+                <button class="action-btn danger" onclick="deleteItem('events', '${id}', 'event')">Удалить</button>
             </td>
         </tr>`;
     }).join('');
@@ -47,11 +47,13 @@ async function handleEventCreate(e) {
     const btn = document.getElementById('event-submit-btn');
     const originalText = showLoading(btn);
     try {
-        const payload = {
-            title: document.getElementById('event-title').value,
-            date: document.getElementById('event-date').value
-        };
-        const created = await createItem('events', payload, 'event');
+        const formData = new FormData();
+        formData.append('title', document.getElementById('event-title').value);
+        formData.append('description', '');
+        formData.append('is_active', true);
+        const dt = document.getElementById('event-date').value;
+        if (dt) formData.append('event_date', new Date(dt).toISOString());
+        const created = await createItemWithFile('events', formData, 'event');
         if (created) {
             form.reset();
         }

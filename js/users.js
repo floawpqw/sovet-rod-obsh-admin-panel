@@ -1,7 +1,7 @@
 // Функции для работы с пользователями
 async function loadUsers() {
     try {
-        const response = await makeAuthRequest('/api/users');
+        const response = await makeAuthRequest('/api/users/');
         if (response.ok) {
             const users = await response.json();
             renderUsers(users);
@@ -24,16 +24,16 @@ function renderUsers(users) {
     
     container.innerHTML = users.map(user => `
         <tr>
-            <td>${user.id}</td>
-            <td>${user.name || 'Не указано'}</td>
-            <td>${user.email}</td>
-            <td>${user.username}</td>
-            <td>${user.role}</td>
+            <td>${user.id || '—'}</td>
+            <td>${user.username || 'Не указано'}</td>
+            <td>${user.email || ''}</td>
+            <td>${user.username || ''}</td>
+            <td>${user.role || '—'}</td>
             <td><span class="status-badge ${user.is_active ? 'status-published' : 'status-draft'}">${user.is_active ? 'Активен' : 'Неактивен'}</span></td>
             <td class="actions">
-                <button class="action-btn warning" onclick="editUser(${user.id})">Редактировать</button>
-                <button class="action-btn danger" onclick="deleteItem('users', ${user.id}, 'user')">Удалить</button>
-                <button class="action-btn secondary" onclick="toggleUserStatus(${user.id}, ${user.is_active})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>
+                ${user.id ? `<button class="action-btn warning" onclick="editUser('${user.id}')">Редактировать</button>` : ''}
+                ${user.id ? `<button class="action-btn danger" onclick="deleteItem('users', '${user.id}', 'user')">Удалить</button>` : ''}
+                ${user.id ? `<button class="action-btn secondary" onclick="toggleUserStatus('${user.id}', ${user.is_active})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>` : ''}
             </td>
         </tr>
     `).join('');
@@ -45,10 +45,8 @@ async function handleUserInvite(e) {
     const originalText = showLoading(btn);
     try {
         const email = document.getElementById('invite-email').value;
-        const response = await makeAuthRequest('/api/auth/send-register-invitation/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
+        const response = await makeAuthRequest(`/api/auth/send-register-invitation/?email=${encodeURIComponent(email)}`, {
+            method: 'POST'
         });
         if (response.ok) {
             showNotification('Приглашение отправлено!', 'success');
@@ -65,12 +63,24 @@ async function handleUserInvite(e) {
 }
 
 async function toggleUserStatus(id, currentStatus) {
-    await toggleItemStatus('users', id, currentStatus, 'user');
+    try {
+        const path = currentStatus ? `/api/users/${id}/deactivate/` : `/api/users/${id}/activate/`;
+        const method = currentStatus ? 'DELETE' : 'PATCH';
+        const response = await makeAuthRequest(path, { method });
+        if (response.ok) {
+            showNotification('Статус пользователя изменен!');
+            loadUsers();
+        } else {
+            showNotification('Не удалось изменить статус пользователя', 'error');
+        }
+    } catch (error) {
+        showNotification('Ошибка изменения статуса пользователя', 'error');
+    }
 }
 
 async function editUser(id) {
     try {
-        const response = await makeAuthRequest(`/api/users/${id}`);
+        const response = await makeAuthRequest(`/api/users/${id}/`);
         if (response.ok) {
             const user = await response.json();
             showEditModal('user', user);

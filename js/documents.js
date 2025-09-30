@@ -1,7 +1,7 @@
 // Функции для работы с документами
 async function loadDocuments() {
     try {
-        const response = await makeAuthRequest('/api/documents');
+        const response = await makeAuthRequest('/api/documents/');
         if (response.ok) {
             const documents = await response.json();
             renderDocuments(documents);
@@ -26,7 +26,7 @@ function renderDocuments(documents) {
         <tr>
             <td>${document.id}</td>
             <td>${document.title}</td>
-            <td>${getDocumentCategoryText(document.category)}</td>
+            <td>${getDocumentCategoryText(document.category || 'other')}</td>
             <td>
                 ${document.file_url ? 
                     `<a href="${document.file_url}" target="_blank" style="color: var(--primary-red); text-decoration: none;">
@@ -36,7 +36,7 @@ function renderDocuments(documents) {
                 }
             </td>
             <td>${document.file_size ? formatFileSize(document.file_size) : 'N/A'}</td>
-            <td><span class="status-badge ${getDocumentAccessClass(document.access)}">${getDocumentAccessText(document.access)}</span></td>
+            <td><span class="status-badge ${document.is_active ? 'status-published' : 'status-draft'}">${document.is_active ? 'Активен' : 'Неактивен'}</span></td>
             <td class="actions">
                 <button class="action-btn warning" onclick="editDocument(${document.id})">Редактировать</button>
                 <button class="action-btn danger" onclick="deleteItem('documents', ${document.id}, 'document')">Удалить</button>
@@ -57,23 +57,7 @@ function getDocumentCategoryText(category) {
     return categories[category] || category;
 }
 
-function getDocumentAccessClass(access) {
-    const classes = {
-        'public': 'status-published',
-        'private': 'status-draft',
-        'restricted': 'status-in-progress'
-    };
-    return classes[access] || 'status-draft';
-}
-
-function getDocumentAccessText(access) {
-    const texts = {
-        'public': 'Публичный',
-        'private': 'Приватный',
-        'restricted': 'Ограниченный'
-    };
-    return texts[access] || access;
-}
+// В текущей спецификации статусы документов управляются полем is_active
 
 function getFileIcon(filename) {
     const ext = filename.split('.').pop().toLowerCase();
@@ -105,10 +89,7 @@ async function handleDocumentCreate(e) {
     
     const formData = new FormData();
     formData.append('title', document.getElementById('document-title').value);
-    formData.append('description', document.getElementById('document-description').value);
-    formData.append('category', document.getElementById('document-category').value);
-    formData.append('access', document.getElementById('document-access').value);
-    formData.append('status', document.getElementById('document-status').value);
+    formData.append('is_active', document.getElementById('document-status').value === 'active');
     
     const file = document.getElementById('document-file').files[0];
     if (file) formData.append('file', file);
@@ -122,7 +103,7 @@ function downloadDocument(url) {
 
 async function editDocument(id) {
     try {
-        const response = await makeAuthRequest(`/api/documents/${id}`);
+        const response = await makeAuthRequest(`/api/documents/${id}/`);
         if (response.ok) {
             const document = await response.json();
             showEditModal('document', document);

@@ -1,7 +1,7 @@
 // Функции для работы с проектами
 async function loadProjects() {
     try {
-        const response = await makeAuthRequest('/api/projects');
+        const response = await makeAuthRequest('/api/projects/');
         if (response.ok) {
             const projects = await response.json();
             renderProjects(projects);
@@ -27,11 +27,11 @@ function renderProjects(projects) {
             <td>${project.id}</td>
             <td>${project.title}</td>
             <td>${project.image_url ? `<img src="${project.image_url}" alt="${project.title}" style="max-width: 80px; max-height: 60px; border-radius: 4px;">` : 'Нет'}</td>
-            <td><span class="status-badge ${getStatusClass(project.status)}">${getStatusText(project.status)}</span></td>
+            <td><span class="status-badge ${project.is_active ? 'status-published' : 'status-draft'}">${project.is_active ? 'Активен' : 'Неактивен'}</span></td>
             <td>${project.category || 'Не указана'}</td>
             <td class="actions">
-                <button class="action-btn warning" onclick="editProject(${project.id})">Редактировать</button>
-                <button class="action-btn danger" onclick="deleteItem('projects', ${project.id}, 'project')">Удалить</button>
+                <button class="action-btn warning" onclick="editProject('${project.id}')">Редактировать</button>
+                <button class="action-btn danger" onclick="deleteItem('projects', '${project.id}', 'project')">Удалить</button>
             </td>
         </tr>
     `).join('');
@@ -77,12 +77,12 @@ async function handleProjectCreate(e) {
 
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('content', content);
-    formData.append('active', activeEl.value);
-    formData.append('teaser', teaser);
+    formData.append('body', content);
+    formData.append('is_active', activeEl.value === 'true');
+    formData.append('min_text', teaser);
     formData.append('theme', theme);
     formData.append('category', category);
-    keywords.forEach(kw => formData.append('keywords[]', kw));
+    keywords.forEach(kw => formData.append('keywords', kw));
     formData.append('image', imageFile);
 
     await createItemWithFile('projects', formData, 'project');
@@ -90,7 +90,7 @@ async function handleProjectCreate(e) {
 
 async function editProject(id) {
     try {
-        const response = await makeAuthRequest(`/api/projects/${id}`);
+        const response = await makeAuthRequest(`/api/projects/${id}/`);
         if (response.ok) {
             const project = await response.json();
             showEditModal('project', project);

@@ -28,7 +28,7 @@ async function makeAuthRequest(url, options = {}) {
 // Выход из системы на стороне API
 async function apiLogout() {
     try {
-        const response = await makeAuthRequest('/api/auth/logout', { method: 'POST' });
+        const response = await makeAuthRequest('/api/auth/logout/', { method: 'POST' });
         // Даже если сервер вернул не 2xx, локально мы все равно завершим выход
         return response.ok;
     } catch (_) {
@@ -41,7 +41,7 @@ async function createItem(endpoint, data, type) {
     const originalText = showLoading(btn);
     
     try {
-        const response = await makeAuthRequest(`/api/${endpoint}`, {
+        const response = await makeAuthRequest(`/api/${endpoint}/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -52,7 +52,9 @@ async function createItem(endpoint, data, type) {
         if (response.ok) {
             showNotification(`${getTypeName(type).capitalize()} успешно создан!`);
             toggleForm(type);
-            refreshData(endpoint);
+            if (typeof refreshData === 'function') {
+                refreshData(endpoint);
+            }
             return true;
         } else {
             const errorData = await response.json().catch(() => ({}));
@@ -72,7 +74,7 @@ async function createItemWithFile(endpoint, formData, type) {
     const originalText = showLoading(btn);
     
     try {
-        const response = await makeAuthRequest(`/api/${endpoint}`, {
+        const response = await makeAuthRequest(`/api/${endpoint}/`, {
             method: 'POST',
             body: formData
         });
@@ -80,7 +82,9 @@ async function createItemWithFile(endpoint, formData, type) {
         if (response.ok) {
             showNotification(`${getTypeName(type).capitalize()} успешно создан!`);
             toggleForm(type);
-            refreshData(endpoint);
+            if (typeof refreshData === 'function') {
+                refreshData(endpoint);
+            }
             return true;
         } else {
             const errorData = await response.json().catch(() => ({}));
@@ -95,17 +99,40 @@ async function createItemWithFile(endpoint, formData, type) {
     }
 }
 
+function getDeletePathByType(type, id) {
+    switch (type) {
+        case 'user': return `/api/users/${id}/delete/`;
+        case 'news': return `/api/news/${id}/`;
+        case 'project': return `/api/projects/${id}/`;
+        case 'banner': return `/api/banners/${id}/`;
+        case 'partner': return `/api/partners/${id}/`;
+        case 'poll': return `/api/polls/${id}/`;
+        case 'subscription': return `/api/subscribers/${id}/`;
+        case 'document': return `/api/documents/${id}/`;
+        case 'event': return `/api/events/${id}/`;
+        case 'question': return `/api/feedbacks/${id}/`;
+        default: return null;
+    }
+}
+
 async function deleteItem(endpoint, id, type) {
     if (!confirm(`Вы уверены, что хотите удалить этот ${getTypeName(type)}?`)) return false;
+    const path = getDeletePathByType(type, id);
+    if (!path) {
+        showNotification('Удаление для данного типа не поддерживается', 'error');
+        return false;
+    }
     
     try {
-        const response = await makeAuthRequest(`/api/${endpoint}/${id}`, {
+        const response = await makeAuthRequest(path, {
             method: 'DELETE'
         });
         
         if (response.ok) {
             showNotification(`${getTypeName(type).capitalize()} успешно удален!`);
-            refreshData(endpoint);
+            if (typeof refreshData === 'function') {
+                refreshData(endpoint);
+            }
             return true;
         } else {
             showNotification(`Ошибка удаления ${getTypeName(type)}`, 'error');
@@ -117,33 +144,8 @@ async function deleteItem(endpoint, id, type) {
     }
 }
 
-async function toggleItemStatus(endpoint, id, currentStatus, type) {
-    try {
-        const response = await makeAuthRequest(`/api/${endpoint}/${id}/toggle-status`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: !currentStatus })
-        });
-        
-        if (response.ok) {
-            showNotification('Статус успешно изменен!');
-            refreshData(endpoint);
-            return true;
-        } else {
-            showNotification('Ошибка изменения статуса', 'error');
-            return false;
-        }
-    } catch (error) {
-        showNotification('Ошибка изменения статуса', 'error');
-        return false;
-    }
-}
-
 // Глобальные функции
 window.deleteItem = deleteItem;
-window.toggleItemStatus = toggleItemStatus;
 window.apiLogout = apiLogout;
 // Экспорт базовых API-хелперов в глобальную область видимости
 window.makeAuthRequest = makeAuthRequest;
