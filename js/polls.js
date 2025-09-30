@@ -1,7 +1,7 @@
 // Функции для работы с опросами
 async function loadPolls() {
     try {
-        const response = await makeAuthRequest('/api/polls');
+        const response = await makeAuthRequest('/api/polls/');
         if (response.ok) {
             const polls = await response.json();
             renderPolls(polls);
@@ -25,14 +25,13 @@ function renderPolls(polls) {
     container.innerHTML = polls.map(poll => `
         <tr>
             <td>${poll.id}</td>
-            <td>${poll.question}</td>
-            <td>${poll.options ? poll.options.length : 0}</td>
-            <td>${poll.total_votes || 0}</td>
-            <td><span class="status-badge ${getPollStatusClass(poll.status)}">${getPollStatusText(poll.status)}</span></td>
+            <td>${poll.theme}</td>
+            <td>${(poll.questions || []).length}</td>
+            <td>—</td>
+            <td><span class="status-badge ${poll.is_active ? 'status-published' : 'status-draft'}">${poll.is_active ? 'Активен' : 'Неактивен'}</span></td>
             <td class="actions">
-                <button class="action-btn warning" onclick="editPoll(${poll.id})">Редактировать</button>
-                <button class="action-btn danger" onclick="deleteItem('polls', ${poll.id}, 'poll')">Удалить</button>
-                <button class="action-btn" onclick="viewPollResults(${poll.id})">Результаты</button>
+                <button class="action-btn warning" onclick="editPoll('${poll.id}')">Редактировать</button>
+                <button class="action-btn danger" onclick="deleteItem('polls', '${poll.id}', 'poll')">Удалить</button>
             </td>
         </tr>
     `).join('');
@@ -50,16 +49,12 @@ async function handlePollCreate(e) {
         return;
     }
     
-    const formData = {
-        question: document.getElementById('poll-question').value,
-        description: document.getElementById('poll-description').value,
-        options: options,
-        status: document.getElementById('poll-status').value,
-        start_date: document.getElementById('poll-start-date').value,
-        end_date: document.getElementById('poll-end-date').value
+    const body = {
+        theme: document.getElementById('poll-question').value,
+        is_active: document.getElementById('poll-status').value !== 'inactive',
     };
-    
-    await createItem('polls', formData, 'poll');
+    const created = await createItem('polls', body, 'poll');
+    if (!created) return;
 }
 
 function initPollForm() {
@@ -95,17 +90,7 @@ function initPollForm() {
     }
 }
 
-async function viewPollResults(pollId) {
-    try {
-        const response = await makeAuthRequest(`/api/polls/${pollId}/results`);
-        if (response.ok) {
-            const results = await response.json();
-            showPollResultsModal(results);
-        }
-    } catch (error) {
-        showNotification('Ошибка загрузки результатов опроса', 'error');
-    }
-}
+// В спецификации нет агрегированного эндпоинта результатов
 
 function showPollResultsModal(results) {
     const modalContent = document.getElementById('modal-content');
@@ -147,7 +132,7 @@ function showPollResultsModal(results) {
 
 async function editPoll(id) {
     try {
-        const response = await makeAuthRequest(`/api/polls/${id}`);
+        const response = await makeAuthRequest(`/api/polls/${id}/`);
         if (response.ok) {
             const poll = await response.json();
             showEditModal('poll', poll);

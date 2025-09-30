@@ -1,7 +1,7 @@
 // Функции для работы с партнерами
 async function loadPartners() {
     try {
-        const response = await makeAuthRequest('/api/partners');
+        const response = await makeAuthRequest('/api/partners/');
         if (response.ok) {
             const partners = await response.json();
             renderPartners(partners);
@@ -25,14 +25,13 @@ function renderPartners(partners) {
     container.innerHTML = partners.map(partner => `
         <tr>
             <td>${partner.id}</td>
-            <td>${partner.name}</td>
-            <td>${partner.logo_url ? `<img src="${partner.logo_url}" alt="${partner.name}" style="max-width: 80px; max-height: 60px; border-radius: 4px;">` : 'Нет'}</td>
-            <td>${getPartnerTypeText(partner.type)}</td>
-            <td><span class="status-badge ${partner.status === 'active' ? 'status-published' : 'status-draft'}">${partner.status === 'active' ? 'Активен' : 'Неактивен'}</span></td>
+            <td>${partner.partner_name}</td>
+            <td>${partner.logo_url ? `<img src="${partner.logo_url}" alt="${partner.partner_name}" style="max-width: 80px; max-height: 60px; border-radius: 4px;">` : 'Нет'}</td>
+            <td>${partner.partner_url || '—'}</td>
+            <td><span class="status-badge status-published">Активен</span></td>
             <td class="actions">
-                <button class="action-btn warning" onclick="editPartner(${partner.id})">Редактировать</button>
-                <button class="action-btn danger" onclick="deleteItem('partners', ${partner.id}, 'partner')">Удалить</button>
-                <button class="action-btn secondary" onclick="togglePartnerStatus(${partner.id}, '${partner.status}')">${partner.status === 'active' ? 'Деактивировать' : 'Активировать'}</button>
+                <button class="action-btn warning" onclick="editPartner('${partner.id}')">Редактировать</button>
+                <button class="action-btn danger" onclick="deleteItem('partners', '${partner.id}', 'partner')">Удалить</button>
             </td>
         </tr>
     `).join('');
@@ -42,11 +41,10 @@ async function handlePartnerCreate(e) {
     e.preventDefault();
     
     const formData = new FormData();
-    formData.append('name', document.getElementById('partner-name').value);
-    formData.append('description', document.getElementById('partner-description').value);
-    formData.append('website', document.getElementById('partner-website').value || '');
-    formData.append('type', document.getElementById('partner-type').value);
-    formData.append('status', document.getElementById('partner-status').value);
+    formData.append('partner_name', document.getElementById('partner-name').value);
+    formData.append('partner_url', document.getElementById('partner-website').value || '');
+    const countOrder = 1;
+    formData.append('count_order', countOrder);
     
     const logoFile = document.getElementById('partner-logo').files[0];
     if (logoFile) formData.append('logo', logoFile);
@@ -54,28 +52,11 @@ async function handlePartnerCreate(e) {
     await createItemWithFile('partners', formData, 'partner');
 }
 
-async function togglePartnerStatus(id, currentStatus) {
-    try {
-        const response = await makeAuthRequest(`/api/partners/${id}/toggle-status`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: currentStatus === 'active' ? 'inactive' : 'active' })
-        });
-        
-        if (response.ok) {
-            showNotification('Статус партнера изменен!');
-            loadPartners();
-        }
-    } catch (error) {
-        showNotification('Ошибка изменения статуса партнера', 'error');
-    }
-}
+// Статусы не переключаются отдельным эндпоинтом согласно спецификации
 
 async function editPartner(id) {
     try {
-        const response = await makeAuthRequest(`/api/partners/${id}`);
+        const response = await makeAuthRequest(`/api/partners/${id}/`);
         if (response.ok) {
             const partner = await response.json();
             showEditModal('partner', partner);
@@ -87,4 +68,3 @@ async function editPartner(id) {
 
 // Глобальные функции
 window.editPartner = editPartner;
-window.togglePartnerStatus = togglePartnerStatus;

@@ -41,30 +41,28 @@ function renderQuestions(questions) {
             <td>${middleName}</td>
             <td>${email}</td>
             <td title="${message.replace(/"/g, '&quot;')}">${shortMessage}</td>
-            <td><span class="status-badge ${question.answered ? 'status-published' : 'status-draft'}">${question.answered ? 'Отвечен' : 'Ожидает'}</span></td>
+            <td><span class="status-badge ${question.is_answered ? 'status-published' : 'status-draft'}">${question.is_answered ? 'Отвечен' : 'Ожидает'}</span></td>
             <td title="${String(answer).replace(/"/g, '&quot;')}">${answer ? `${String(answer).substring(0, 40)}${String(answer).length > 40 ? '...' : ''}` : ''}</td>
             <td>${dateStr}</td>
             <td class="actions">
                 <button class="action-btn" onclick="answerQuestion(${question.id}, ${canEmail})">Ответить</button>
                 <button class="action-btn danger" onclick="deleteItem('feedbacks', ${question.id}, 'question')">Удалить</button>
-                ${question.answered ? `<button class=\"action-btn warning\" onclick=\"markQuestionUnanswered(${question.id})\">Отменить ответ</button>` : ''}
             </td>
         </tr>`;
     }).join('');
 }
 
 async function answerQuestion(id, canEmail = false) {
-    const answer = prompt('Введите ответ на вопрос:');
+        const answer = prompt('Введите ответ на вопрос:');
     if (!answer) return;
     
     try {
-        const sendEmail = canEmail ? confirm('Отправить ответ на email пользователя?') : false;
-        const response = await makeAuthRequest(`/api/feedbacks/${id}/answer`, {
+        const response = await makeAuthRequest(`/api/feedbacks/${id}/answer/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ answer, send_email: sendEmail })
+            body: JSON.stringify({ response: answer })
         });
         
         if (response.ok) {
@@ -76,21 +74,8 @@ async function answerQuestion(id, canEmail = false) {
     }
 }
 
-async function markQuestionUnanswered(id) {
-    try {
-        const response = await makeAuthRequest(`/api/feedbacks/${id}/unanswer`, {
-            method: 'POST'
-        });
-        
-        if (response.ok) {
-            showNotification('Ответ отменен!');
-            loadQuestions();
-        }
-    } catch (error) {
-        showNotification('Ошибка отмены ответа', 'error');
-    }
-}
+// Эндпоинта для отмены ответа нет в спецификации
 
 // Глобальные функции
 window.answerQuestion = answerQuestion;
-window.markQuestionUnanswered = markQuestionUnanswered;
+// Нет экспорта отмены ответа

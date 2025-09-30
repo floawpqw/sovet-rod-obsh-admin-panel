@@ -1,7 +1,7 @@
 // Функции для работы с новостями
 async function loadNews() {
     try {
-        const response = await makeAuthRequest('/api/news');
+        const response = await makeAuthRequest('/api/news/');
         if (response.ok) {
             const news = await response.json();
             renderNews(news);
@@ -27,12 +27,11 @@ function renderNews(news) {
             <td>${item.id}</td>
             <td>${item.title}</td>
             <td>${item.image_url ? `<img src="${item.image_url}" alt="${item.title}" style="max-width: 80px; max-height: 60px; border-radius: 4px;">` : 'Нет'}</td>
-            <td><span class="status-badge ${item.status === 'published' ? 'status-published' : 'status-draft'}">${item.status === 'published' ? 'Опубликовано' : 'Черновик'}</span></td>
-            <td>${new Date(item.created_at || item.createdAt).toLocaleDateString()}</td>
+            <td><span class="status-badge status-published">Опубликовано</span></td>
+            <td>${item.news_date ? new Date(item.news_date).toLocaleDateString() : ''}</td>
             <td class="actions">
-                <button class="action-btn warning" onclick="editNews(${item.id})">Редактировать</button>
-                <button class="action-btn danger" onclick="deleteItem('news', ${item.id}, 'news')">Удалить</button>
-                <button class="action-btn secondary" onclick="toggleNewsStatus(${item.id}, '${item.status}')">${item.status === 'published' ? 'В черновик' : 'Опубликовать'}</button>
+                <button class="action-btn warning" onclick="editNews('${item.id}')">Редактировать</button>
+                <button class="action-btn danger" onclick="deleteItem('news', '${item.id}', 'news')">Удалить</button>
             </td>
         </tr>
     `).join('');
@@ -41,47 +40,50 @@ function renderNews(news) {
 async function handleNewsCreate(e) {
     e.preventDefault();
     
-    // Валидация: содержание должно быть HTML-блоком (например, <div>...)</div>)
-    const contentValue = document.getElementById('news-content').value.trim();
-    const looksLikeHtmlBlock = /^<([a-zA-Z][\w:-]*)\b[\s\S]*<\/\1>\s*$/m.test(contentValue);
-    if (!looksLikeHtmlBlock) {
-        showNotification('Поле "Содержание" должно содержать валидный HTML-блок, например <div>...</div>.', 'error');
+    const title = document.getElementById('news-title').value.trim();
+    const body = document.getElementById('news-content').value.trim();
+    const imageFile = document.getElementById('news-image').files[0];
+    const minText = body.substring(0, 140) || 'text';
+    const newsDate = new Date().toISOString().substring(0,10);
+
+    if (!title || !body || !imageFile) {
+        showNotification('Заполните заголовок, содержание и прикрепите изображение.', 'error');
+        return;
+    }
+
+    // Требуется выбрать тип новости. Пока используем первый доступный тип
+    let typeId = null;
+    try {
+        const typesRes = await makeAuthRequest('/api/news/types/');
+        if (typesRes.ok) {
+            const types = await typesRes.json();
+            if (Array.isArray(types) && types.length > 0) {
+                typeId = types[0].id;
+            }
+        }
+    } catch (_) {}
+    if (!typeId) {
+        showNotification('Не найден тип новости. Создайте тип новости в системе.', 'error');
         return;
     }
 
     const formData = new FormData();
-    formData.append('title', document.getElementById('news-title').value);
-    formData.append('content', contentValue);
-    formData.append('status', document.getElementById('news-status').value);
-    
-    const imageFile = document.getElementById('news-image').files[0];
-    if (imageFile) formData.append('image', imageFile);
-    
+    formData.append('title', title);
+    formData.append('body', body);
+    formData.append('image', imageFile);
+    formData.append('min_text', minText);
+    formData.append('news_date', newsDate);
+    formData.append('type_id', typeId);
+    formData.append('keywords', '[]');
+
     await createItemWithFile('news', formData, 'news');
 }
 
-async function toggleNewsStatus(id, currentStatus) {
-    try {
-        const response = await makeAuthRequest(`/api/news/${id}/toggle-status`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: currentStatus === 'published' ? 'draft' : 'published' })
-        });
-        
-        if (response.ok) {
-            showNotification('Статус новости изменен!');
-            loadNews();
-        }
-    } catch (error) {
-        showNotification('Ошибка изменения статуса новости', 'error');
-    }
-}
+// Тоггла статуса у новостей нет в спецификации — действие удалено
 
 async function editNews(id) {
     try {
-        const response = await makeAuthRequest(`/api/news/${id}`);
+        const response = await makeAuthRequest(`/api/news/${id}/`);
         if (response.ok) {
             const news = await response.json();
             showEditModal('news', news);
@@ -93,4 +95,3 @@ async function editNews(id) {
 
 // Глобальные функции
 window.editNews = editNews;
-window.toggleNewsStatus = toggleNewsStatus;
