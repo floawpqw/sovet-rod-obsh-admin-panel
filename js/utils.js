@@ -112,7 +112,8 @@ function getTypeName(type) {
         'partner': 'партнера',
         'poll': 'опрос',
         'question': 'вопрос',
-        'service': 'услугу'
+        'service': 'услугу',
+        'event': 'мероприятие'
     };
     return names[type] || type;
 }

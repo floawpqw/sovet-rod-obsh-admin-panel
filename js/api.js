@@ -141,21 +141,11 @@ async function toggleItemStatus(endpoint, id, currentStatus, type) {
     }
 }
 
-function refreshData(endpoint) {
-    switch(endpoint) {
-        case 'users': typeof loadUsers === 'function' && loadUsers(); break;
-        case 'news': typeof loadNews === 'function' && loadNews(); break;
-        case 'projects': typeof loadProjects === 'function' && loadProjects(); break;
-        case 'banners': typeof loadBanners === 'function' && loadBanners(); break;
-        case 'partners': typeof loadPartners === 'function' && loadPartners(); break;
-        case 'polls': typeof loadPolls === 'function' && loadPolls(); break;
-        case 'questions': typeof loadQuestions === 'function' && loadQuestions(); break;
-        case 'feedbacks': typeof loadQuestions === 'function' && loadQuestions(); break;
-    }
-    // Статистика удалена вместе с настройками
-}
-
 // Глобальные функции
 window.deleteItem = deleteItem;
 window.toggleItemStatus = toggleItemStatus;
 window.apiLogout = apiLogout;
+// Экспорт базовых API-хелперов в глобальную область видимости
+window.makeAuthRequest = makeAuthRequest;
+window.createItem = createItem;
+window.createItemWithFile = createItemWithFile;

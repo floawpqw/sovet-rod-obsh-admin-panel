@@ -41,5 +41,25 @@ function renderEvents(events) {
     }).join('');
 }
 
+async function handleEventCreate(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = document.getElementById('event-submit-btn');
+    const originalText = showLoading(btn);
+    try {
+        const payload = {
+            title: document.getElementById('event-title').value,
+            date: document.getElementById('event-date').value
+        };
+        const created = await createItem('events', payload, 'event');
+        if (created) {
+            form.reset();
+        }
+    } finally {
+        hideLoading(btn, originalText);
+    }
+}
+
 // Глобальные функции
 window.loadEvents = loadEvents;
+window.handleEventCreate = handleEventCreate;

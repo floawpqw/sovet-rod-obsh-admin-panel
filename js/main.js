@@ -121,6 +121,15 @@ function initForms() {
         if (toggleContactForm) toggleContactForm.addEventListener('click', () => toggleForm('contact'));
         if (cancelContactBtn) cancelContactBtn.addEventListener('click', () => toggleForm('contact'));
         if (contactCreateForm) contactCreateForm.addEventListener('submit', handleContactCreate);
+
+        // Форма мероприятий
+        const toggleEventForm = document.getElementById('toggle-event-form');
+        const cancelEventBtn = document.getElementById('cancel-event-btn');
+        const eventCreateForm = document.getElementById('event-create-form');
+        
+        if (toggleEventForm) toggleEventForm.addEventListener('click', () => toggleForm('event'));
+        if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => toggleForm('event'));
+        if (eventCreateForm) eventCreateForm.addEventListener('submit', handleEventCreate);
     }
 
 function handleNavigation(link) {

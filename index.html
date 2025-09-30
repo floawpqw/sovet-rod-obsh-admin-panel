@@ -750,7 +750,27 @@
             <!-- Секция мероприятий -->
             <section id="events" class="content-section">
                 <h2>Мероприятия</h2>
-                
+				
+				<button id="toggle-event-form" class="toggle-form-btn">+ Добавить мероприятие</button>
+				
+				<div id="event-form" class="add-form" style="display: none;">
+					<h3>Добавить новое мероприятие</h3>
+					<form id="event-create-form">
+						<div class="form-group">
+							<label for="event-title">Название *</label>
+							<input type="text" id="event-title" required placeholder="Введите название мероприятия">
+						</div>
+						<div class="form-group">
+							<label for="event-date">Дата и время *</label>
+							<input type="datetime-local" id="event-date" required>
+						</div>
+						<div class="form-actions">
+							<button type="submit" id="event-submit-btn">Сохранить мероприятие</button>
+							<button type="button" id="cancel-event-btn" class="secondary">Отмена</button>
+						</div>
+					</form>
+				</div>
+				
                 <table>
                     <thead>
                         <tr>
