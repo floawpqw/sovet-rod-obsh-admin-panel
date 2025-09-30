@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Окно авторизации -->
+    <div id="auth-section" class="auth-container">
+        <h1>Admin Panel</h1>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" id="login-btn">Войти</button>
+        </form>
+        <div id="auth-notification" class="notification" style="display: none;"></div>
+    </div>
+
+    <!-- Основной интерфейс -->
+    <div id="admin-section" class="admin-container" style="display: none;">
+        <header class="header">
+            <div class="container">
+                <nav class="nav">
+                    <h1>Admin Panel</h1>
+                    <ul class="nav-links">
+                        <li><a href="#users" class="nav-link active">Пользователи</a></li>
+                        <li><a href="#news" class="nav-link">Новости</a></li>
+                        <li><a href="#projects" class="nav-link">Проекты</a></li>
+                        <li><a href="#banners" class="nav-link">Баннеры</a></li>
+                        <li><a href="#partners" class="nav-link">Партнеры</a></li>
+                        <li><a href="#polls" class="nav-link">Опросы</a></li>
+                        <li><a href="#subscriptions" class="nav-link">Подписки</a></li>
+                        <li><a href="#documents" class="nav-link">Документы</a></li>
+                        <li><a href="#contacts" class="nav-link">Контакты</a></li>
+                        <li><a href="#events" class="nav-link">Мероприятия</a></li>
+                        <li><a href="#questions" class="nav-link">Вопросы</a></li>
+                        <li><button id="logout-btn" class="logout-btn">Выйти</button></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <div class="container">
+            <div id="notification" class="notification" style="display: none;"></div>
+
+            <!-- Секция пользователей -->
+            <section id="users" class="content-section active">
+                <h2>Управление пользователями</h2>
+                
+                <button id="toggle-user-form" class="toggle-form-btn">+ Пригласить пользователя</button>
+                
+                <div id="user-form" class="add-form" style="display: none;">
+                    <h3>Отправить приглашение на регистрацию</h3>
+                    <form id="user-invite-form">
+                        <div class="form-group">
+                            <label for="invite-email">Email для приглашения *</label>
+                            <input type="email" id="invite-email" required placeholder="user@example.com">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="user-submit-btn">Отправить приглашение</button>
+                            <button type="button" id="cancel-user-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя</th>
+                            <th>Email</th>
+                            <th>Логин</th>
+                            <th>Роль</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-list">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Загрузка...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция новостей -->
+            <section id="news" class="content-section">
+                <h2>Управление новостями</h2>
+                
+                <button id="toggle-news-form" class="toggle-form-btn">+ Добавить новость</button>
+                
+                <div id="news-form" class="add-form" style="display: none;">
+                    <h3>Добавить новую новость</h3>
+                    <form id="news-create-form">
+                        <div class="form-group">
+                            <label for="news-title">Заголовок *</label>
+                            <input type="text" id="news-title" required placeholder="Введите заголовок новости">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="news-content">Содержание *</label>
+                            <textarea id="news-content" required placeholder="Вставьте HTML-блок, например: <div>...</div>"></textarea>
+                            <small>Важно: в это поле необходимо вставить HTML-блок (например, <code>&lt;div&gt;...&lt;/div&gt;</code>). Этот блок будет внедрён на основной сайт без изменений.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="news-image">Изображение</label>
+                            <input type="file" id="news-image" accept="image/*">
+                            <div class="image-preview-container">
+                                <div class="preview-title">Предпросмотр:</div>
+                                <img id="news-image-preview" class="image-preview" alt="Предпросмотр изображения">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="news-status">Статус</label>
+                            <select id="news-status">
+                                <option value="published">Опубликовано</option>
+                                <option value="draft">Черновик</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="news-submit-btn">Сохранить новость</button>
+                            <button type="button" id="cancel-news-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Заголовок</th>
+                            <th>Изображение</th>
+                            <th>Статус</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="news-list">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Загрузка новостей...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция проектов -->
+            <section id="projects" class="content-section">
+                <h2>Управление проектами</h2>
+                
+                <button id="toggle-project-form" class="toggle-form-btn">+ Добавить проект</button>
+                
+                <div id="project-form" class="add-form" style="display: none;">
+                    <h3>Добавить новый проект</h3>
+                    <form id="project-create-form">
+                        <div class="form-group">
+                            <label for="project-title">Заголовок *</label>
+                            <input type="text" id="project-title" required placeholder="Введите заголовок проекта">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-content">Содержание (HTML-блок) *</label>
+                            <textarea id="project-content" required placeholder="Вставьте HTML-блок, например: &lt;div&gt;...&lt;/div&gt;"></textarea>
+                            <small>Важно: в это поле необходимо вставить HTML-блок (например, <code>&lt;div&gt;...&lt;/div&gt;</code>). Этот блок будет внедрён на основной сайт без изменений.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Активен *</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="project-active" value="true" required> Да</label>
+                                <label><input type="radio" name="project-active" value="false" required> Нет</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-keywords">Ключевые слова (список) *</label>
+                            <input type="text" id="project-keywords" required placeholder="например: образование, воспитание, школа">
+                            <small>Введите список ключевых слов через запятую. При отправке каждое слово передаётся как отдельный элемент списка.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-teaser">Минимальный текст для главной страницы *</label>
+                            <textarea id="project-teaser" required placeholder="Краткое описание проекта для главной страницы"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-image">Изображение *</label>
+                            <input type="file" id="project-image" accept="image/*" required>
+                            <div class="image-preview-container">
+                                <div class="preview-title">Предпросмотр:</div>
+                                <img id="project-image-preview" class="image-preview" alt="Предпросмотр изображения">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-theme">Тематика проекта *</label>
+                            <select id="project-theme" required>
+                                <option value="">Не выбрано</option>
+                                <option value="education">Образование</option>
+                                <option value="upbringing">Воспитание</option>
+                                <option value="culture">Культура</option>
+                                <option value="sport">Спорт</option>
+                                <option value="health">Здоровье</option>
+                                <option value="other">Другое</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-category">Категория *</label>
+                            <select id="project-category" required>
+                                <option value="">Не выбрано</option>
+                                <option value="parents">Для родителей</option>
+                                <option value="teachers">Для учителей</option>
+                                <option value="students">Для учеников</option>
+                                <option value="administration">Для администрации</option>
+                                <option value="community">Для сообщества</option>
+                                <option value="other">Прочее</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="project-submit-btn">Сохранить проект</button>
+                            <button type="button" id="cancel-project-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Изображение</th>
+                            <th>Статус</th>
+                            <th>Категория</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projects-list">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Загрузка проектов...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция баннеров -->
+            <section id="banners" class="content-section">
+                <h2>Управление баннерами</h2>
+                
+                <button id="toggle-banner-form" class="toggle-form-btn">+ Добавить баннер</button>
+                
+                <div id="banner-form" class="add-form" style="display: none;">
+                    <h3>Добавить новый баннер</h3>
+                    <form id="banner-create-form">
+                        <div class="form-group">
+                            <label for="banner-title">Название баннера *</label>
+                            <input type="text" id="banner-title" required placeholder="Название баннера">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="banner-description">Описание</label>
+                            <textarea id="banner-description" placeholder="Описание баннера"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="banner-image">Изображение баннера *</label>
+                            <input type="file" id="banner-image" accept="image/*" required>
+                            <div class="image-preview-container">
+                                <div class="preview-title">Предпросмотр:</div>
+                                <img id="banner-image-preview" class="image-preview" alt="Предпросмотр баннера">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="banner-link">Ссылка</label>
+                            <input type="text" id="banner-link" placeholder="https://example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="banner-position">Позиция</label>
+                            <select id="banner-position">
+                                <option value="top">Верх</option>
+                                <option value="middle">Середина</option>
+                                <option value="bottom">Низ</option>
+                                <option value="sidebar">Боковая панель</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="banner-status">Статус</label>
+                            <select id="banner-status">
+                                <option value="active">Активен</option>
+                                <option value="inactive">Неактивен</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="banner-submit-btn">Сохранить баннер</button>
+                            <button type="button" id="cancel-banner-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Изображение</th>
+                            <th>Позиция</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="banners-list">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Загрузка баннеров...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция партнеров -->
+            <section id="partners" class="content-section">
+                <h2>Управление партнерами</h2>
+                
+                <button id="toggle-partner-form" class="toggle-form-btn">+ Добавить партнера</button>
+                
+                <div id="partner-form" class="add-form" style="display: none;">
+                    <h3>Добавить нового партнера</h3>
+                    <form id="partner-create-form">
+                        <div class="form-group">
+                            <label for="partner-name">Название партнера *</label>
+                            <input type="text" id="partner-name" required placeholder="Название компании">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="partner-description">Описание</label>
+                            <textarea id="partner-description" placeholder="Описание партнера"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="partner-logo">Логотип партнера *</label>
+                            <input type="file" id="partner-logo" accept="image/*" required>
+                            <div class="image-preview-container">
+                                <div class="preview-title">Предпросмотр:</div>
+                                <img id="partner-logo-preview" class="image-preview" alt="Предпросмотр логотипа">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="partner-website">Веб-сайт</label>
+                            <input type="text" id="partner-website" placeholder="https://example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="partner-type">Тип партнерства</label>
+                            <select id="partner-type">
+                                <option value="strategic">Стратегический</option>
+                                <option value="technical">Технический</option>
+                                <option value="marketing">Маркетинговый</option>
+                                <option value="general">Общий</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="partner-status">Статус</label>
+                            <select id="partner-status">
+                                <option value="active">Активен</option>
+                                <option value="inactive">Неактивен</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="partner-submit-btn">Сохранить партнера</button>
+                            <button type="button" id="cancel-partner-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Логотип</th>
+                            <th>Тип</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partners-list">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Загрузка партнеров...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция опросов -->
+            <section id="polls" class="content-section">
+                <h2>Управление опросами</h2>
+                
+                <button id="toggle-poll-form" class="toggle-form-btn">+ Добавить опрос</button>
+                
+                <div id="poll-form" class="add-form" style="display: none;">
+                    <h3>Добавить новый опрос</h3>
+                    <form id="poll-create-form">
+                        <div class="form-group">
+                            <label for="poll-question">Вопрос опроса *</label>
+                            <input type="text" id="poll-question" required placeholder="Введите вопрос">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="poll-description">Описание опроса</label>
+                            <textarea id="poll-description" placeholder="Описание опроса"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Варианты ответов *</label>
+                            <div id="poll-options-container">
+                                <div class="poll-option">
+                                    <input type="text" name="poll-options[]" placeholder="Вариант ответа" required>
+                                    <button type="button" class="danger remove-option">×</button>
+                                </div>
+                                <div class="poll-option">
+                                    <input type="text" name="poll-options[]" placeholder="Вариант ответа" required>
+                                    <button type="button" class="danger remove-option">×</button>
+                                </div>
+                            </div>
+                            <button type="button" id="add-option-btn" class="secondary" style="margin-top: 10px;">+ Добавить вариант</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="poll-status">Статус</label>
+                            <select id="poll-status">
+                                <option value="active">Активен</option>
+                                <option value="inactive">Неактивен</option>
+                                <option value="completed">Завершен</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="poll-start-date">Дата начала</label>
+                            <input type="datetime-local" id="poll-start-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="poll-end-date">Дата окончания</label>
+                            <input type="datetime-local" id="poll-end-date">
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="poll-submit-btn">Сохранить опрос</button>
+                            <button type="button" id="cancel-poll-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Вопрос</th>
+                            <th>Вариантов</th>
+                            <th>Голосов</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="polls-list">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Загрузка опросов...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция подписок -->
+            <section id="subscriptions" class="content-section">
+                <h2>Управление подписками</h2>
+                
+                <button id="toggle-subscription-form" class="toggle-form-btn">+ Добавить подписку</button>
+                
+                <div id="subscription-form" class="add-form" style="display: none;">
+                    <h3>Добавить новую подписку</h3>
+                    <form id="subscription-create-form">
+                        <div class="form-group">
+                            <label for="subscription-email">Email подписчика *</label>
+                            <input type="email" id="subscription-email" required placeholder="subscriber@example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subscription-name">Имя подписчика</label>
+                            <input type="text" id="subscription-name" placeholder="Имя подписчика">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subscription-type">Тип подписки</label>
+                            <select id="subscription-type">
+                                <option value="newsletter">Рассылка новостей</option>
+                                <option value="updates">Обновления</option>
+                                <option value="promotions">Акции и скидки</option>
+                                <option value="all">Все уведомления</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subscription-status">Статус</label>
+                            <select id="subscription-status">
+                                <option value="active">Активна</option>
+                                <option value="inactive">Неактивна</option>
+                                <option value="unsubscribed">Отписана</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="subscription-submit-btn">Сохранить подписку</button>
+                            <button type="button" id="cancel-subscription-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Имя</th>
+                            <th>Тип</th>
+                            <th>Статус</th>
+                            <th>Дата подписки</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subscriptions-list">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Загрузка подписок...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция документов -->
+            <section id="documents" class="content-section">
+                <h2>Управление документами</h2>
+                
+                <button id="toggle-document-form" class="toggle-form-btn">+ Добавить документ</button>
+                
+                <div id="document-form" class="add-form" style="display: none;">
+                    <h3>Добавить новый документ</h3>
+                    <form id="document-create-form">
+                        <div class="form-group">
+                            <label for="document-title">Название документа *</label>
+                            <input type="text" id="document-title" required placeholder="Название документа">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="document-description">Описание</label>
+                            <textarea id="document-description" placeholder="Описание документа"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="document-file">Файл документа *</label>
+                            <input type="file" id="document-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt" required>
+                            <small>Поддерживаемые форматы: PDF, DOC, DOCX, XLS, XLSX, TXT</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="document-category">Категория</label>
+                            <select id="document-category">
+                                <option value="legal">Юридические</option>
+                                <option value="technical">Технические</option>
+                                <option value="financial">Финансовые</option>
+                                <option value="marketing">Маркетинг</option>
+                                <option value="other">Другие</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="document-access">Доступ</label>
+                            <select id="document-access">
+                                <option value="public">Публичный</option>
+                                <option value="private">Приватный</option>
+                                <option value="restricted">Ограниченный</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="document-status">Статус</label>
+                            <select id="document-status">
+                                <option value="active">Активен</option>
+                                <option value="inactive">Неактивен</option>
+                                <option value="archived">В архиве</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="document-submit-btn">Сохранить документ</button>
+                            <button type="button" id="cancel-document-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Категория</th>
+                            <th>Файл</th>
+                            <th>Размер</th>
+                            <th>Доступ</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documents-list">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Загрузка документов...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция контактов -->
+            <section id="contacts" class="content-section">
+                <h2>Управление контактами</h2>
+                
+                <button id="toggle-contact-form" class="toggle-form-btn">+ Добавить контакт</button>
+                
+                <div id="contact-form" class="add-form" style="display: none;">
+                    <h3>Добавить новый контакт</h3>
+                    <form id="contact-create-form">
+                        <div class="form-group">
+                            <label for="contact-name">Имя *</label>
+                            <input type="text" id="contact-name" required placeholder="Имя контакта">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-email">Email *</label>
+                            <input type="email" id="contact-email" required placeholder="contact@example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-phone">Телефон</label>
+                            <input type="text" id="contact-phone" placeholder="+7 (XXX) XXX-XX-XX">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-position">Должность</label>
+                            <input type="text" id="contact-position" placeholder="Должность">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-department">Отдел</label>
+                            <input type="text" id="contact-department" placeholder="Отдел">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-company">Компания</label>
+                            <input type="text" id="contact-company" placeholder="Компания">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-type">Тип контакта</label>
+                            <select id="contact-type">
+                                <option value="client">Клиент</option>
+                                <option value="partner">Партнер</option>
+                                <option value="supplier">Поставщик</option>
+                                <option value="employee">Сотрудник</option>
+                                <option value="other">Другой</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contact-status">Статус</label>
+                            <select id="contact-status">
+                                <option value="active">Активен</option>
+                                <option value="inactive">Неактивен</option>
+                                <option value="blocked">Заблокирован</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" id="contact-submit-btn">Сохранить контакт</button>
+                            <button type="button" id="cancel-contact-btn" class="secondary">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя</th>
+                            <th>Email</th>
+                            <th>Телефон</th>
+                            <th>Должность</th>
+                            <th>Тип</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contacts-list">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Загрузка контактов...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция вопросов -->
+            <section id="questions" class="content-section">
+                <h2>Вопросы от пользователей</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя</th>
+                            <th>Фамилия</th>
+                            <th>Отчество</th>
+                            <th>Email</th>
+                            <th>Вопрос</th>
+                            <th>Статус</th>
+                            <th>Ответ</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="questions-list">
+                        <tr>
+                            <td colspan="10" style="text-align: center;">Загрузка вопросов...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Секция мероприятий -->
+            <section id="events" class="content-section">
+                <h2>Мероприятия</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-list">
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Загрузка мероприятий...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/users.js"></script>
+    <script src="js/news.js"></script>
+    <script src="js/projects.js"></script>
+    <script src="js/banners.js"></script>
+    <script src="js/partners.js"></script>
+    <script src="js/polls.js"></script>
+    <script src="js/subscriptions.js"></script>
+    <script src="js/documents.js"></script>
+    <script src="js/contacts.js"></script>
+    <script src="js/questions.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
+</html>
