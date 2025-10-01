@@ -1,24 +1,56 @@
 // Базовые API функции
+async function refreshAccessToken() {
+    if (!refreshToken) return false;
+    try {
+        const response = await fetch(`${API_BASE}/api/auth/refresh/`, {
+            method: 'POST',
+            headers: {
+                'X-Refresh-Token': refreshToken
+            }
+        });
+        if (!response.ok) return false;
+        const data = await response.json().catch(() => ({}));
+        const newAccess = data.access_token || null;
+        const newRefresh = data.refresh_token || refreshToken || null;
+        if (!newAccess) return false;
+        setTokens(newAccess, newRefresh);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
 async function makeAuthRequest(url, options = {}) {
     const headers = {
-        'Authorization': `Bearer ${authToken}`,
         ...options.headers
     };
-    
+    if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+    }
     try {
         const response = await fetch(`${API_BASE}${url}`, {
             ...options,
             headers
         });
-        
-        if (response.status === 401) {
-            authToken = null;
-            localStorage.removeItem('authToken');
-            showAuthForm();
-            throw new Error('Требуется авторизация');
+        if (response.status !== 401) {
+            return response;
         }
-        
-        return response;
+        // 401: try refresh once
+        const didRefresh = await refreshAccessToken();
+        if (didRefresh) {
+            const retryHeaders = {
+                ...options.headers
+            };
+            if (authToken) retryHeaders['Authorization'] = `Bearer ${authToken}`;
+            const retryResponse = await fetch(`${API_BASE}${url}`, {
+                ...options,
+                headers: retryHeaders
+            });
+            if (retryResponse.status !== 401) return retryResponse;
+        }
+        clearTokens();
+        showAuthForm();
+        throw new Error('Требуется авторизация');
     } catch (error) {
         console.error('API Request error:', error);
         throw error;
@@ -28,8 +60,23 @@ async function makeAuthRequest(url, options = {}) {
 // Выход из системы на стороне API
 async function apiLogout() {
     try {
-        const response = await makeAuthRequest('/api/auth/logout/', { method: 'POST' });
-        // Даже если сервер вернул не 2xx, локально мы все равно завершим выход
+        const headers = {};
+        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+        if (refreshToken) headers['X-Refresh-Token'] = refreshToken;
+        const response = await fetch(`${API_BASE}/api/auth/logout/`, {
+            method: 'POST',
+            headers
+        });
+        return response.ok;
+    } catch (_) {
+        return false;
+    }
+}
+
+async function verifyAuth() {
+    if (!authToken) return false;
+    try {
+        const response = await makeAuthRequest('/api/users/me/');
         return response.ok;
     } catch (_) {
         return false;
@@ -147,6 +194,7 @@ async function deleteItem(endpoint, id, type) {
 // Глобальные функции
 window.deleteItem = deleteItem;
 window.apiLogout = apiLogout;
+window.verifyAuth = verifyAuth;
 // Экспорт базовых API-хелперов в глобальную область видимости
 window.makeAuthRequest = makeAuthRequest;
 window.createItem = createItem;

@@ -1,12 +1,15 @@
 // Обработка авторизации
-document.addEventListener('DOMContentLoaded', () => {
-    if (authToken) {
-        showAdminPanel();
-        if (typeof loadUsers === 'function') loadUsers();
-        if (typeof loadSystemStats === 'function') loadSystemStats();
-    } else {
-        showAuthForm();
+document.addEventListener('DOMContentLoaded', async () => {
+    if (authToken && typeof verifyAuth === 'function') {
+        const ok = await verifyAuth();
+        if (ok) {
+            showAdminPanel();
+            if (typeof loadUsers === 'function') loadUsers();
+            if (typeof loadSystemStats === 'function') loadSystemStats();
+            return;
+        }
     }
+    showAuthForm();
 });
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -33,14 +36,20 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         
         if (response.ok) {
             const data = await response.json();
-            
-            if (data.access_token) {
-                authToken = data.access_token;
-                localStorage.setItem('authToken', authToken);
-                showAdminPanel();
-                if (typeof loadUsers === 'function') loadUsers();
-                if (typeof loadSystemStats === 'function') loadSystemStats();
-                showNotification('Успешный вход!', 'success', 'auth-notification');
+            const access = data.access_token;
+            const refresh = data.refresh_token || null;
+            if (access) {
+                if (typeof setTokens === 'function') setTokens(access, refresh);
+                // Verify token before showing UI
+                const ok = typeof verifyAuth === 'function' ? await verifyAuth() : false;
+                if (ok) {
+                    showAdminPanel();
+                    if (typeof loadUsers === 'function') loadUsers();
+                    if (typeof loadSystemStats === 'function') loadSystemStats();
+                    showNotification('Успешный вход!', 'success', 'auth-notification');
+                } else {
+                    showNotification('Не удалось подтвердить авторизацию', 'error', 'auth-notification');
+                }
             } else {
                 showNotification('Токен не найден в ответе', 'error', 'auth-notification');
             }
@@ -71,8 +80,7 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     } catch (_) {
         // Игнорируем ошибку логаута, продолжаем локальный выход
     } finally {
-        authToken = null;
-        localStorage.removeItem('authToken');
+        if (typeof clearTokens === 'function') clearTokens();
         showAuthForm();
         showNotification('Вы вышли из системы', 'success');
     }
