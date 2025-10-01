@@ -1,10 +1,32 @@
 // Глобальные переменные
 const API_BASE = 'https://terlynedev.space';
 let authToken = localStorage.getItem('authToken');
+let refreshToken = localStorage.getItem('refreshToken');
 let currentEditId = null;
 let currentEditType = null;
 
 // Утилиты
+function setTokens(accessToken, newRefreshToken) {
+	authToken = accessToken || null;
+	refreshToken = newRefreshToken || null;
+	if (authToken) {
+		localStorage.setItem('authToken', authToken);
+	} else {
+		localStorage.removeItem('authToken');
+	}
+	if (refreshToken) {
+		localStorage.setItem('refreshToken', refreshToken);
+	} else {
+		localStorage.removeItem('refreshToken');
+	}
+}
+
+function clearTokens() {
+	setTokens(null, null);
+}
+
+window.setTokens = setTokens;
+window.clearTokens = clearTokens;
 function showNotification(message, type = 'success', elementId = 'notification') {
     const notification = document.getElementById(elementId);
     if (notification) {
