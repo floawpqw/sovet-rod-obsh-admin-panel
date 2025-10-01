@@ -73,7 +73,7 @@ async function apiLogout() {
     }
 }
 
-async function verifyAuth() {
+window.verifyAuth = async function verifyAuth() {
     if (!authToken) return false;
     try {
         const response = await makeAuthRequest('/api/users/me/');
@@ -81,7 +81,7 @@ async function verifyAuth() {
     } catch (_) {
         return false;
     }
-}
+};
 
 async function createItem(endpoint, data, type) {
     const btn = document.getElementById(`${type}-submit-btn`);
@@ -194,7 +194,6 @@ async function deleteItem(endpoint, id, type) {
 // Глобальные функции
 window.deleteItem = deleteItem;
 window.apiLogout = apiLogout;
-window.verifyAuth = verifyAuth;
 // Экспорт базовых API-хелперов в глобальную область видимости
 window.makeAuthRequest = makeAuthRequest;
 window.createItem = createItem;
