@@ -51,17 +51,22 @@ async function handleNewsCreate(e) {
         return;
     }
 
-    // Требуется выбрать тип новости. Пока используем первый доступный тип
-    let typeId = null;
-    try {
-        const typesRes = await makeAuthRequest('/api/news/types/');
-        if (typesRes.ok) {
-            const types = await typesRes.json();
-            if (Array.isArray(types) && types.length > 0) {
-                typeId = types[0].id;
+    // Тип новости: из селекта или создать новый
+    let typeId = document.getElementById('news-type-select')?.value || '';
+    const newTypeName = (document.getElementById('news-type-name')?.value || '').trim();
+    if (!typeId && newTypeName) {
+        try {
+            const res = await makeAuthRequest('/api/news/types/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: newTypeName })
+            });
+            if (res.ok) {
+                const created = await res.json();
+                typeId = created.id;
             }
-        }
-    } catch (_) {}
+        } catch (_) {}
+    }
     if (!typeId) {
         showNotification('Не найден тип новости. Создайте тип новости в системе.', 'error');
         return;
@@ -80,61 +85,15 @@ async function handleNewsCreate(e) {
 }
 
 // Добавление типа новости
-document.addEventListener('DOMContentLoaded', () => {
-    const typeToggleBtn = document.createElement('button');
-    typeToggleBtn.id = 'toggle-news-type-form';
-    typeToggleBtn.className = 'toggle-form-btn';
-    typeToggleBtn.textContent = '+ Добавить тип новости';
-    const section = document.getElementById('news');
-    if (section) {
-        section.querySelector('h2')?.after(typeToggleBtn);
-        typeToggleBtn.addEventListener('click', () => {
-            const form = document.getElementById('news-type-form');
-            if (!form) return;
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            typeToggleBtn.textContent = form.style.display === 'none' ? '+ Добавить тип новости' : '− Скрыть форму';
-        });
-    }
-
-    const cancelBtn = document.getElementById('cancel-news-type-btn');
-    if (cancelBtn) cancelBtn.addEventListener('click', () => {
-        const form = document.getElementById('news-type-form');
-        if (form) form.style.display = 'none';
-        typeToggleBtn.textContent = '+ Добавить тип новости';
-    });
-
-    const typeForm = document.getElementById('news-type-create-form');
-    if (typeForm) {
-        typeForm.addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const btn = document.getElementById('news-type-submit-btn');
-            const original = showLoading(btn);
-            try {
-                const typeName = document.getElementById('news-type-name').value.trim();
-                if (!typeName) {
-                    showNotification('Укажите название типа', 'error');
-                    return;
-                }
-                const res = await makeAuthRequest('/api/news/types/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: typeName })
-                });
-                if (res.ok) {
-                    showNotification('Тип новости создан', 'success');
-                    typeForm.reset();
-                    const form = document.getElementById('news-type-form');
-                    if (form) form.style.display = 'none';
-                    typeToggleBtn.textContent = '+ Добавить тип новости';
-                } else {
-                    const err = await res.json().catch(() => ({}));
-                    showNotification(err.detail || 'Не удалось создать тип', 'error');
-                }
-            } finally {
-                hideLoading(btn, original);
-            }
-        });
-    }
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await makeAuthRequest('/api/news/types/');
+        if (res.ok) {
+            const types = await res.json();
+            const sel = document.getElementById('news-type-select');
+            if (sel) sel.innerHTML = (types || []).map(t => `<option value=\"${t.id}\">${t.type}</option>`).join('');
+        }
+    } catch (_) {}
 });
 
 // Тоггла статуса у новостей нет в спецификации — действие удалено

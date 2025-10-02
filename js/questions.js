@@ -44,6 +44,38 @@ function renderQuestions(questions) {
     }).join('');
 }
 
+// Создание вопроса
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleBtn = document.getElementById('toggle-question-form');
+    const cancelBtn = document.getElementById('cancel-question-btn');
+    const formEl = document.getElementById('question-create-form');
+    if (toggleBtn) toggleBtn.addEventListener('click', () => toggleForm('question'));
+    if (cancelBtn) cancelBtn.addEventListener('click', () => toggleForm('question'));
+    if (formEl) formEl.addEventListener('submit', handleQuestionCreate);
+});
+
+async function handleQuestionCreate(e) {
+    e.preventDefault();
+    const btn = document.getElementById('question-submit-btn');
+    const original = showLoading(btn);
+    try {
+        const body = {
+            first_name: document.getElementById('question-first-name').value,
+            last_name: document.getElementById('question-last-name').value,
+            middle_name: document.getElementById('question-middle-name').value,
+            email: document.getElementById('question-email').value || null,
+            message: document.getElementById('question-message').value,
+        };
+        const created = await createItem('feedbacks', body, 'question');
+        if (created) {
+            toggleForm('question');
+            loadQuestions();
+        }
+    } finally {
+        hideLoading(btn, original);
+    }
+}
+
 async function answerQuestion(id, canEmail = false) {
         const answer = prompt('Введите ответ на вопрос:');
     if (!answer) return;
