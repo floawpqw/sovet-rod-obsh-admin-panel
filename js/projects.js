@@ -55,18 +55,7 @@ async function handleProjectCreate(e) {
         return;
     }
 
-    // Проверка, что "Содержание" содержит HTML-блок (предпочтительно <div>)
-    const template = document.createElement('template');
-    template.innerHTML = content.trim();
-    const hasElementNode = Array.from(template.content.childNodes).some(n => n.nodeType === 1);
-    const hasDiv = template.content.querySelector('div') !== null;
-    if (!hasElementNode) {
-        showNotification('Поле «Содержание» должно содержать HTML-блок (например, <div>...</div>).', 'error');
-        return;
-    }
-    if (!hasDiv) {
-        showNotification('Рекомендуется использовать корневой <div> в поле «Содержание».', 'warning');
-    }
+    // Больше не требуем HTML, поле содержит ссылку
 
     // Ключевые слова как список (через форму, не JSON)
     const keywords = keywordsRaw.split(',').map(k => k.trim()).filter(k => k.length > 0);

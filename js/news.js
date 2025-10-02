@@ -51,19 +51,10 @@ async function handleNewsCreate(e) {
         return;
     }
 
-    // Требуется выбрать тип новости. Пока используем первый доступный тип
-    let typeId = null;
-    try {
-        const typesRes = await makeAuthRequest('/api/news/types/');
-        if (typesRes.ok) {
-            const types = await typesRes.json();
-            if (Array.isArray(types) && types.length > 0) {
-                typeId = types[0].id;
-            }
-        }
-    } catch (_) {}
-    if (!typeId) {
-        showNotification('Не найден тип новости. Создайте тип новости в системе.', 'error');
+    // Тип новости: из селекта или создать новый
+    const typeName = (document.getElementById('news-type-name')?.value || '').trim();
+    if (!typeName) {
+        showNotification('Укажите тип новости', 'error');
         return;
     }
 
@@ -73,11 +64,39 @@ async function handleNewsCreate(e) {
     formData.append('image', imageFile);
     formData.append('min_text', minText);
     formData.append('news_date', newsDate);
+    // Получаем id типа по названию (создаем, если нет)
+    let typeId = null;
+    try {
+        const typesRes = await makeAuthRequest('/api/news/types/');
+        if (typesRes.ok) {
+            const types = await typesRes.json();
+            const found = (types || []).find(t => String(t.type).toLowerCase() === typeName.toLowerCase());
+            if (found) typeId = found.id;
+        }
+    } catch (_) {}
+    if (!typeId) {
+        const createRes = await makeAuthRequest('/api/news/types/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: typeName })
+        });
+        if (createRes.ok) {
+            const created = await createRes.json();
+            typeId = created.id;
+        }
+    }
+    if (!typeId) {
+        showNotification('Не удалось определить тип новости', 'error');
+        return;
+    }
     formData.append('type_id', typeId);
     formData.append('keywords', '[]');
 
     await createItemWithFile('news', formData, 'news');
 }
+
+// Добавление типа новости
+// Типы подгружать в инпут не требуется, ввод свободный
 
 // Тоггла статуса у новостей нет в спецификации — действие удалено
 

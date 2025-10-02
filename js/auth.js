@@ -56,7 +56,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         } else {
             let userMessage = 'Ошибка авторизации';
             if (response.status === 400 || response.status === 401) {
-                userMessage = 'Неверный логин или пароль';
+                userMessage = 'Вы ввели неправильный логин или пароль';
             } else if (response.status === 429) {
                 userMessage = 'Слишком много попыток. Попробуйте позже.';
             }

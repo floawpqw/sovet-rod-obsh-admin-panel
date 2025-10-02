@@ -40,15 +40,6 @@ function renderPolls(polls) {
 async function handlePollCreate(e) {
     e.preventDefault();
     
-    const options = Array.from(document.querySelectorAll('input[name="poll-options[]"]'))
-        .map(input => input.value.trim())
-        .filter(option => option !== '');
-    
-    if (options.length < 2) {
-        showNotification('Добавьте至少 2 варианта ответа', 'error');
-        return;
-    }
-    
     const body = {
         theme: document.getElementById('poll-question').value,
         is_active: document.getElementById('poll-status').value !== 'inactive',

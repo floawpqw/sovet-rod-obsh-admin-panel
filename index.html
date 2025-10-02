@@ -13,8 +13,8 @@
         <h1>Admin Panel</h1>
         <form id="login-form">
             <div class="form-group">
-                <label for="username">Логин</label>
-                <input type="text" id="username" required>
+                <label for="username">Эл. почта или имя пользователя</label>
+                <input type="text" id="username" required placeholder="Эл. почта или имя пользователя">
             </div>
             <div class="form-group">
                 <label for="password">Пароль</label>
@@ -107,9 +107,13 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="news-content">Содержание *</label>
-                            <textarea id="news-content" required placeholder="Вставьте HTML-блок, например: <div>...</div>"></textarea>
-                            <small>Важно: в это поле необходимо вставить HTML-блок (например, <code>&lt;div&gt;...&lt;/div&gt;</code>). Этот блок будет внедрён на основной сайт без изменений.</small>
+                            <label for="news-type-name">Тип новости *</label>
+                            <input type="text" id="news-type-name" required placeholder="Например: Объявления">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="news-content">Ссылка на новость *</label>
+                            <textarea id="news-content" required placeholder="https://example.com/news"></textarea>
                         </div>
                         
                         <div class="form-group">
@@ -170,9 +174,8 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="project-content">Содержание (HTML-блок) *</label>
-                            <textarea id="project-content" required placeholder="Вставьте HTML-блок, например: &lt;div&gt;...&lt;/div&gt;"></textarea>
-                            <small>Важно: в это поле необходимо вставить HTML-блок (например, <code>&lt;div&gt;...&lt;/div&gt;</code>). Этот блок будет внедрён на основной сайт без изменений.</small>
+                            <label for="project-content">Ссылка на проект *</label>
+                            <textarea id="project-content" required placeholder="https://example.com/project"></textarea>
                         </div>
                         
                         <div class="form-group">
@@ -289,13 +292,8 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="banner-position">Позиция</label>
-                            <select id="banner-position">
-                                <option value="top">Верх</option>
-                                <option value="middle">Середина</option>
-                                <option value="bottom">Низ</option>
-                                <option value="sidebar">Боковая панель</option>
-                            </select>
+                            <label for="banner-position">Позиция (число)</label>
+                            <input type="number" id="banner-position" min="1" placeholder="1">
                         </div>
                         
                         <div class="form-group">
@@ -347,11 +345,6 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="partner-description">Описание</label>
-                            <textarea id="partner-description" placeholder="Описание партнера"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
                             <label for="partner-logo">Логотип партнера *</label>
                             <input type="file" id="partner-logo" accept="image/*" required>
                             <div class="image-preview-container">
@@ -363,24 +356,6 @@
                         <div class="form-group">
                             <label for="partner-website">Веб-сайт</label>
                             <input type="text" id="partner-website" placeholder="https://example.com">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="partner-type">Тип партнерства</label>
-                            <select id="partner-type">
-                                <option value="strategic">Стратегический</option>
-                                <option value="technical">Технический</option>
-                                <option value="marketing">Маркетинговый</option>
-                                <option value="general">Общий</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="partner-status">Статус</label>
-                            <select id="partner-status">
-                                <option value="active">Активен</option>
-                                <option value="inactive">Неактивен</option>
-                            </select>
                         </div>
                         
                         <div class="form-actions">
@@ -396,8 +371,6 @@
                             <th>ID</th>
                             <th>Название</th>
                             <th>Логотип</th>
-                            <th>Тип</th>
-                            <th>Статус</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -494,41 +467,29 @@
                 
                 <button id="toggle-subscription-form" class="toggle-form-btn">+ Добавить подписку</button>
                 
-                <div id="subscription-form" class="add-form" style="display: none;">
-                    <h3>Добавить новую подписку</h3>
-                    <form id="subscription-create-form">
+                
+                <div id="mailing-form" class="add-form" style="display: none;">
+                    <h3>Сделать рассылку по типу новости</h3>
+                    <form id="start-mailing-form">
                         <div class="form-group">
-                            <label for="subscription-email">Email подписчика *</label>
-                            <input type="email" id="subscription-email" required placeholder="subscriber@example.com">
+                            <label for="mailing-type">Тип новости</label>
+                            <select id="mailing-type"></select>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="subscription-name">Имя подписчика</label>
-                            <input type="text" id="subscription-name" placeholder="Имя подписчика">
+                            <label for="mailing-title">Заголовок письма *</label>
+                            <input type="text" id="mailing-title" required placeholder="Заголовок письма">
                         </div>
-                        
                         <div class="form-group">
-                            <label for="subscription-type">Тип подписки</label>
-                            <select id="subscription-type">
-                                <option value="newsletter">Рассылка новостей</option>
-                                <option value="updates">Обновления</option>
-                                <option value="promotions">Акции и скидки</option>
-                                <option value="all">Все уведомления</option>
-                            </select>
+                            <label for="mailing-text">Текст письма *</label>
+                            <textarea id="mailing-text" required placeholder="Текст письма"></textarea>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="subscription-status">Статус</label>
-                            <select id="subscription-status">
-                                <option value="active">Активна</option>
-                                <option value="inactive">Неактивна</option>
-                                <option value="unsubscribed">Отписана</option>
-                            </select>
+                            <label for="mailing-url">Ссылка на новость *</label>
+                            <input type="text" id="mailing-url" required placeholder="https://example.com/news">
                         </div>
-                        
                         <div class="form-actions">
-                            <button type="submit" id="subscription-submit-btn">Сохранить подписку</button>
-                            <button type="button" id="cancel-subscription-btn" class="secondary">Отмена</button>
+                            <button type="submit" id="mailing-submit-btn">Запустить рассылку</button>
+                            <button type="button" id="cancel-mailing-btn" class="secondary">Отмена</button>
                         </div>
                     </form>
                 </div>
@@ -565,11 +526,6 @@
                         <div class="form-group">
                             <label for="document-title">Название документа *</label>
                             <input type="text" id="document-title" required placeholder="Название документа">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="document-description">Описание</label>
-                            <textarea id="document-description" placeholder="Описание документа"></textarea>
                         </div>
                         
                         <div class="form-group">
@@ -638,64 +594,36 @@
             <section id="contacts" class="content-section">
                 <h2>Управление контактами</h2>
                 
-                <button id="toggle-contact-form" class="toggle-form-btn">+ Добавить контакт</button>
-                
-                <div id="contact-form" class="add-form" style="display: none;">
-                    <h3>Добавить новый контакт</h3>
-                    <form id="contact-create-form">
+                <div id="contacts-edit" class="add-form" style="display: none;">
+                    <h3>Изменить контакты</h3>
+                    <form id="contacts-edit-form">
                         <div class="form-group">
-                            <label for="contact-name">Имя *</label>
-                            <input type="text" id="contact-name" required placeholder="Имя контакта">
+                            <label for="contacts-phone">Номер телефона</label>
+                            <input type="text" id="contacts-phone" placeholder="+7 (XXX) XXX-XX-XX">
                         </div>
-                        
                         <div class="form-group">
-                            <label for="contact-email">Email *</label>
-                            <input type="email" id="contact-email" required placeholder="contact@example.com">
+                            <label for="contacts-email">Email</label>
+                            <input type="email" id="contacts-email" placeholder="contact@example.com">
                         </div>
-                        
                         <div class="form-group">
-                            <label for="contact-phone">Телефон</label>
-                            <input type="text" id="contact-phone" placeholder="+7 (XXX) XXX-XX-XX">
+                            <label for="contacts-work-hours">Часы работы</label>
+                            <input type="text" id="contacts-work-hours" placeholder="Пн-Пт 9:00-18:00">
                         </div>
-                        
                         <div class="form-group">
-                            <label for="contact-position">Должность</label>
-                            <input type="text" id="contact-position" placeholder="Должность">
+                            <label for="contacts-address">Адрес</label>
+                            <input type="text" id="contacts-address" placeholder="Адрес">
                         </div>
-                        
                         <div class="form-group">
-                            <label for="contact-department">Отдел</label>
-                            <input type="text" id="contact-department" placeholder="Отдел">
+                            <label for="contacts-telegram">Ссылка на Telegram-канал</label>
+                            <input type="text" id="contacts-telegram" placeholder="https://t.me/your_channel">
                         </div>
-                        
                         <div class="form-group">
-                            <label for="contact-company">Компания</label>
-                            <input type="text" id="contact-company" placeholder="Компания">
+                            <label for="contacts-vk">Ссылка на группу ВКонтакте</label>
+                            <input type="text" id="contacts-vk" placeholder="https://vk.com/your_group">
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="contact-type">Тип контакта</label>
-                            <select id="contact-type">
-                                <option value="client">Клиент</option>
-                                <option value="partner">Партнер</option>
-                                <option value="supplier">Поставщик</option>
-                                <option value="employee">Сотрудник</option>
-                                <option value="other">Другой</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="contact-status">Статус</label>
-                            <select id="contact-status">
-                                <option value="active">Активен</option>
-                                <option value="inactive">Неактивен</option>
-                                <option value="blocked">Заблокирован</option>
-                            </select>
-                        </div>
-                        
                         <div class="form-actions">
-                            <button type="submit" id="contact-submit-btn">Сохранить контакт</button>
-                            <button type="button" id="cancel-contact-btn" class="secondary">Отмена</button>
+                            <button type="submit" id="contacts-submit-btn">Сохранить</button>
+                            <button type="button" id="cancel-contacts-btn" class="secondary">Отмена</button>
                         </div>
                     </form>
                 </div>
@@ -703,18 +631,15 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Имя</th>
+                            <th>Адрес</th>
                             <th>Email</th>
                             <th>Телефон</th>
-                            <th>Должность</th>
-                            <th>Тип</th>
-                            <th>Действия</th>
+                            <th>Часы работы</th>
                         </tr>
                     </thead>
                     <tbody id="contacts-list">
                         <tr>
-                            <td colspan="7" style="text-align: center;">Загрузка контактов...</td>
+                            <td colspan="4" style="text-align: center;">Загрузка контактов...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -727,21 +652,17 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Имя</th>
                             <th>Фамилия</th>
                             <th>Отчество</th>
                             <th>Email</th>
-                            <th>Вопрос</th>
-                            <th>Статус</th>
-                            <th>Ответ</th>
-                            <th>Дата</th>
+                            <th>Текст вопроса</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody id="questions-list">
                         <tr>
-                            <td colspan="10" style="text-align: center;">Загрузка вопросов...</td>
+                            <td colspan="6" style="text-align: center;">Загрузка вопросов...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -756,14 +677,33 @@
 				<div id="event-form" class="add-form" style="display: none;">
 					<h3>Добавить новое мероприятие</h3>
 					<form id="event-create-form">
-						<div class="form-group">
-							<label for="event-title">Название *</label>
-							<input type="text" id="event-title" required placeholder="Введите название мероприятия">
-						</div>
-						<div class="form-group">
-							<label for="event-date">Дата и время *</label>
-							<input type="datetime-local" id="event-date" required>
-						</div>
+					<div class="form-group">
+						<label for="event-title">Название мероприятия *</label>
+						<input type="text" id="event-title" required placeholder="Введите название мероприятия">
+					</div>
+					<div class="form-group">
+						<label for="event-description">Описание мероприятия *</label>
+						<textarea id="event-description" required placeholder="Краткое описание мероприятия"></textarea>
+					</div>
+					<div class="form-group">
+						<label for="event-date">Дата мероприятия *</label>
+						<input type="datetime-local" id="event-date" required>
+					</div>
+					<div class="form-group">
+						<label for="event-image">Изображение *</label>
+						<input type="file" id="event-image" accept="image/*" required>
+					</div>
+					<div class="form-group">
+						<label for="event-status">Статус</label>
+						<select id="event-status">
+							<option value="active">Активен</option>
+							<option value="inactive">Неактивен</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="event-location">Локация</label>
+						<input type="text" id="event-location" placeholder="Место проведения">
+					</div>
 						<div class="form-actions">
 							<button type="submit" id="event-submit-btn">Сохранить мероприятие</button>
 							<button type="button" id="cancel-event-btn" class="secondary">Отмена</button>

@@ -73,16 +73,6 @@ async function apiLogout() {
     }
 }
 
-async function verifyAuth() {
-    if (!authToken) return false;
-    try {
-        const response = await makeAuthRequest('/api/users/me/');
-        return response.ok;
-    } catch (_) {
-        return false;
-    }
-}
-
 window.verifyAuth = async function verifyAuth() {
     if (!authToken) return false;
     try {
@@ -204,7 +194,6 @@ async function deleteItem(endpoint, id, type) {
 // Глобальные функции
 window.deleteItem = deleteItem;
 window.apiLogout = apiLogout;
-window.verifyAuth = verifyAuth;
 // Экспорт базовых API-хелперов в глобальную область видимости
 window.makeAuthRequest = makeAuthRequest;
 window.createItem = createItem;

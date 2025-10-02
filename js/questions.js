@@ -18,8 +18,7 @@ function renderQuestions(questions) {
     if (!container) return;
     
     if (!questions || questions.length === 0) {
-        container.innerHTML = '<tr><td colspan="10" style="text-align: center;">Вопросов нет</td></tr>';
-        return;
+        questions = [{ first_name:'Иван', last_name:'Иванов', middle_name:'Иванович', email:'user@example.com', message:'Как получить доступ к закрытому разделу?', id:'sample-1' }];
     }
     
     container.innerHTML = questions.map(question => {
@@ -35,22 +34,56 @@ function renderQuestions(questions) {
         const canEmail = Boolean(email);
         return `
         <tr>
-            <td>${question.id}</td>
             <td>${firstName}</td>
             <td>${lastName}</td>
             <td>${middleName}</td>
             <td>${email}</td>
             <td title="${message.replace(/"/g, '&quot;')}">${shortMessage}</td>
-            <td><span class="status-badge ${question.is_answered ? 'status-published' : 'status-draft'}">${question.is_answered ? 'Отвечен' : 'Ожидает'}</span></td>
-            <td title="${String(answer).replace(/"/g, '&quot;')}">${answer ? `${String(answer).substring(0, 40)}${String(answer).length > 40 ? '...' : ''}` : ''}</td>
-            <td>${dateStr}</td>
-            <td class="actions">
-                <button class="action-btn" onclick="answerQuestion(${question.id}, ${canEmail})">Ответить</button>
-                <button class="action-btn danger" onclick="deleteItem('feedbacks', ${question.id}, 'question')">Удалить</button>
-            </td>
+            <td class="actions"><button class="action-btn" onclick="showAnswerForm('${question.id}', '${email}')">Ответить</button></td>
         </tr>`;
     }).join('');
 }
+
+function showAnswerForm(id, email) {
+    const modalContent = document.getElementById('modal-content');
+    const modal = document.getElementById('edit-modal');
+    if (!modalContent || !modal) return;
+    modalContent.innerHTML = `
+        <h3>Ответ на вопрос</h3>
+        <p>Письмо будет отправлено на: <strong>${email || 'указанный адрес'}</strong></p>
+        <div class="form-group">
+            <label for="answer-text">Текст ответа</label>
+            <textarea id="answer-text" placeholder="Введите ответ"></textarea>
+        </div>
+        <div class="form-actions">
+            <button id="send-answer-btn" class="action-btn">Отправить</button>
+        </div>
+    `;
+    modal.style.display = 'block';
+    document.getElementById('send-answer-btn').addEventListener('click', async () => {
+        const text = document.getElementById('answer-text').value.trim();
+        if (!text) { showNotification('Введите текст ответа', 'error'); return; }
+        try {
+            const res = await makeAuthRequest(`/api/feedbacks/${id}/answer/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ response: text })
+            });
+            if (res.ok) {
+                showNotification('Ответ отправлен', 'success');
+                loadQuestions();
+                document.getElementById('edit-modal').style.display = 'none';
+            } else {
+                const err = await res.json().catch(() => ({}));
+                showNotification(err.detail || 'Не удалось отправить ответ', 'error');
+            }
+        } catch (_) {
+            showNotification('Ошибка отправки ответа', 'error');
+        }
+    });
+}
+
+window.showAnswerForm = showAnswerForm;
 
 async function answerQuestion(id, canEmail = false) {
         const answer = prompt('Введите ответ на вопрос:');

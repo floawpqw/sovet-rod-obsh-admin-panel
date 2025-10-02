@@ -6,6 +6,8 @@ async function loadContacts() {
             const contacts = await response.json();
             // API возвращает один объект ContactsResponse
             renderContacts([contacts]);
+            window.currentContactsData = contacts;
+            initContactsEditForm(contacts);
         } else {
             showNotification('Ошибка загрузки контактов', 'error');
         }
@@ -25,13 +27,13 @@ function renderContacts(contacts) {
     
     container.innerHTML = contacts.map(contact => `
         <tr>
-            <td>—</td>
             <td>${contact.address}</td>
             <td>${contact.email}</td>
             <td>${contact.phone || 'Не указан'}</td>
-            <td>${contact.work_hours || 'Не указаны'}</td>
-            <td><span class="status-badge status-published">Публичные</span></td>
-            <td class="actions">—</td>
+            <td style="display:flex; align-items:center; gap:10px;">
+                <span>${contact.work_hours || 'Не указаны'}</span>
+                <button class="action-btn" onclick="toggleContactsEdit()">Редактировать</button>
+            </td>
         </tr>
     `).join('');
 }
@@ -58,11 +60,87 @@ function getContactTypeText(type) {
     return texts[type] || type;
 }
 
-// Создание/редактирование контактов недоступно в спецификации админки
+function initContactsEditForm(current) {
+    const toggleBtn = document.getElementById('toggle-contact-form');
+    if (toggleBtn) {
+        toggleBtn.textContent = '+ Изменить контакты';
+        toggleBtn.addEventListener('click', () => {
+            const form = document.getElementById('contacts-edit');
+            if (!form) return;
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            toggleBtn.textContent = form.style.display === 'none' ? '+ Изменить контакты' : '− Скрыть форму';
+            if (form.style.display === 'block') {
+                document.getElementById('contacts-phone').value = current.phone || '';
+                document.getElementById('contacts-email').value = current.email || '';
+                document.getElementById('contacts-work-hours').value = current.work_hours || '';
+                document.getElementById('contacts-address').value = current.address || '';
+            }
+        });
+    }
 
-// Нет операций изменения контактов в спецификации
+    const cancelBtn = document.getElementById('cancel-contacts-btn');
+    if (cancelBtn) cancelBtn.addEventListener('click', () => {
+        const form = document.getElementById('contacts-edit');
+        if (form) form.style.display = 'none';
+        if (toggleBtn) toggleBtn.textContent = '+ Изменить контакты';
+    });
 
-// Нет детального эндпоинта для контактов
+    const form = document.getElementById('contacts-edit-form');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('contacts-submit-btn');
+            const original = showLoading(btn);
+            try {
+                const body = {
+                    phone: document.getElementById('contacts-phone').value || null,
+                    email: document.getElementById('contacts-email').value || null,
+                    work_hours: document.getElementById('contacts-work-hours').value || null,
+                    address: document.getElementById('contacts-address').value || null,
+                };
+                const res = await makeAuthRequest('/api/contacts/', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) {
+                    showNotification('Контакты обновлены', 'success');
+                    loadContacts();
+                    const wrapper = document.getElementById('contacts-edit');
+                    if (wrapper) wrapper.style.display = 'none';
+                    if (toggleBtn) toggleBtn.textContent = '+ Изменить контакты';
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showNotification(err.detail || 'Не удалось обновить контакты', 'error');
+                }
+            } finally {
+                hideLoading(btn, original);
+            }
+        });
+    }
+}
+
+function toggleContactsEdit() {
+    const form = document.getElementById('contacts-edit');
+    const toggleBtn = document.getElementById('toggle-contact-form');
+    if (!form) return;
+    const isHidden = form.style.display === 'none';
+    form.style.display = isHidden ? 'block' : 'none';
+    if (isHidden && window.currentContactsData) {
+        const current = window.currentContactsData;
+        const phoneEl = document.getElementById('contacts-phone');
+        const emailEl = document.getElementById('contacts-email');
+        const hoursEl = document.getElementById('contacts-work-hours');
+        const addrEl = document.getElementById('contacts-address');
+        if (phoneEl) phoneEl.value = current.phone || '';
+        if (emailEl) emailEl.value = current.email || '';
+        if (hoursEl) hoursEl.value = current.work_hours || '';
+        if (addrEl) addrEl.value = current.address || '';
+    }
+    if (toggleBtn) toggleBtn.textContent = isHidden ? '− Скрыть форму' : '+ Изменить контакты';
+}
+
+window.toggleContactsEdit = toggleContactsEdit;
 
 // Глобальные функции
 // Нет экспортируемых действий
