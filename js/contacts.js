@@ -6,6 +6,7 @@ async function loadContacts() {
             const contacts = await response.json();
             // API возвращает один объект ContactsResponse
             renderContacts([contacts]);
+            window.currentContactsData = contacts;
             initContactsEditForm(contacts);
         } else {
             showNotification('Ошибка загрузки контактов', 'error');
@@ -125,6 +126,17 @@ function toggleContactsEdit() {
     if (!form) return;
     const isHidden = form.style.display === 'none';
     form.style.display = isHidden ? 'block' : 'none';
+    if (isHidden && window.currentContactsData) {
+        const current = window.currentContactsData;
+        const phoneEl = document.getElementById('contacts-phone');
+        const emailEl = document.getElementById('contacts-email');
+        const hoursEl = document.getElementById('contacts-work-hours');
+        const addrEl = document.getElementById('contacts-address');
+        if (phoneEl) phoneEl.value = current.phone || '';
+        if (emailEl) emailEl.value = current.email || '';
+        if (hoursEl) hoursEl.value = current.work_hours || '';
+        if (addrEl) addrEl.value = current.address || '';
+    }
     if (toggleBtn) toggleBtn.textContent = isHidden ? '− Скрыть форму' : '+ Изменить контакты';
 }
 
