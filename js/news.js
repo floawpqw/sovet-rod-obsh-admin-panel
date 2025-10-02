@@ -52,21 +52,7 @@ async function handleNewsCreate(e) {
     }
 
     // Тип новости: из селекта или создать новый
-    let typeId = document.getElementById('news-type-select')?.value || '';
-    const newTypeName = (document.getElementById('news-type-name')?.value || '').trim();
-    if (!typeId && newTypeName) {
-        try {
-            const res = await makeAuthRequest('/api/news/types/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: newTypeName })
-            });
-            if (res.ok) {
-                const created = await res.json();
-                typeId = created.id;
-            }
-        } catch (_) {}
-    }
+    const typeId = document.getElementById('news-type-select')?.value || '';
     if (!typeId) {
         showNotification('Не найден тип новости. Создайте тип новости в системе.', 'error');
         return;
@@ -91,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (res.ok) {
             const types = await res.json();
             const sel = document.getElementById('news-type-select');
-            if (sel) sel.innerHTML = (types || []).map(t => `<option value=\"${t.id}\">${t.type}</option>`).join('');
+            if (sel) sel.innerHTML = (types || []).map(t => `<option value="${t.id}">${t.type}</option>`).join('');
         }
     } catch (_) {}
 });

@@ -29,7 +29,10 @@ function renderContacts(contacts) {
             <td>${contact.address}</td>
             <td>${contact.email}</td>
             <td>${contact.phone || 'Не указан'}</td>
-            <td>${contact.work_hours || 'Не указаны'}</td>
+            <td style="display:flex; align-items:center; gap:10px;">
+                <span>${contact.work_hours || 'Не указаны'}</span>
+                <button class="action-btn" onclick="toggleContactsEdit()">Редактировать</button>
+            </td>
         </tr>
     `).join('');
 }
@@ -115,6 +118,17 @@ function initContactsEditForm(current) {
         });
     }
 }
+
+function toggleContactsEdit() {
+    const form = document.getElementById('contacts-edit');
+    const toggleBtn = document.getElementById('toggle-contact-form');
+    if (!form) return;
+    const isHidden = form.style.display === 'none';
+    form.style.display = isHidden ? 'block' : 'none';
+    if (toggleBtn) toggleBtn.textContent = isHidden ? '− Скрыть форму' : '+ Изменить контакты';
+}
+
+window.toggleContactsEdit = toggleContactsEdit;
 
 // Глобальные функции
 // Нет экспортируемых действий
