@@ -107,8 +107,8 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="news-type-select">Тип новости *</label>
-                            <select id="news-type-select" required></select>
+                            <label for="news-type-name">Тип новости *</label>
+                            <input type="text" id="news-type-name" required placeholder="Например: Объявления">
                         </div>
                         
                         <div class="form-group">
@@ -641,38 +641,6 @@
             <section id="questions" class="content-section">
                 <h2>Вопросы от пользователей</h2>
                 
-                <button id="toggle-question-form" class="toggle-form-btn">+ Добавить вопрос</button>
-                
-                <div id="question-form" class="add-form" style="display: none;">
-                    <h3>Добавить новый вопрос</h3>
-                    <form id="question-create-form">
-                        <div class="form-group">
-                            <label for="question-first-name">Имя *</label>
-                            <input type="text" id="question-first-name" required placeholder="Имя">
-                        </div>
-                        <div class="form-group">
-                            <label for="question-last-name">Фамилия *</label>
-                            <input type="text" id="question-last-name" required placeholder="Фамилия">
-                        </div>
-                        <div class="form-group">
-                            <label for="question-middle-name">Отчество *</label>
-                            <input type="text" id="question-middle-name" required placeholder="Отчество">
-                        </div>
-                        <div class="form-group">
-                            <label for="question-email">Email</label>
-                            <input type="email" id="question-email" placeholder="user@example.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="question-message">Текст вопроса *</label>
-                            <textarea id="question-message" required placeholder="Ваш вопрос"></textarea>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" id="question-submit-btn">Сохранить вопрос</button>
-                            <button type="button" id="cancel-question-btn" class="secondary">Отмена</button>
-                        </div>
-                    </form>
-                </div>
-                
                 <table>
                     <thead>
                         <tr>
@@ -681,11 +649,12 @@
                             <th>Отчество</th>
                             <th>Email</th>
                             <th>Текст вопроса</th>
+                            <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody id="questions-list">
                         <tr>
-                            <td colspan="5" style="text-align: center;">Загрузка вопросов...</td>
+                            <td colspan="6" style="text-align: center;">Загрузка вопросов...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -700,14 +669,33 @@
 				<div id="event-form" class="add-form" style="display: none;">
 					<h3>Добавить новое мероприятие</h3>
 					<form id="event-create-form">
-						<div class="form-group">
-							<label for="event-title">Название *</label>
-							<input type="text" id="event-title" required placeholder="Введите название мероприятия">
-						</div>
-						<div class="form-group">
-							<label for="event-date">Дата и время *</label>
-							<input type="datetime-local" id="event-date" required>
-						</div>
+					<div class="form-group">
+						<label for="event-title">Название мероприятия *</label>
+						<input type="text" id="event-title" required placeholder="Введите название мероприятия">
+					</div>
+					<div class="form-group">
+						<label for="event-description">Описание мероприятия *</label>
+						<textarea id="event-description" required placeholder="Краткое описание мероприятия"></textarea>
+					</div>
+					<div class="form-group">
+						<label for="event-date">Дата мероприятия *</label>
+						<input type="datetime-local" id="event-date" required>
+					</div>
+					<div class="form-group">
+						<label for="event-image">Изображение *</label>
+						<input type="file" id="event-image" accept="image/*" required>
+					</div>
+					<div class="form-group">
+						<label for="event-status">Статус</label>
+						<select id="event-status">
+							<option value="active">Активен</option>
+							<option value="inactive">Неактивен</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="event-location">Локация</label>
+						<input type="text" id="event-location" placeholder="Место проведения">
+					</div>
 						<div class="form-actions">
 							<button type="submit" id="event-submit-btn">Сохранить мероприятие</button>
 							<button type="button" id="cancel-event-btn" class="secondary">Отмена</button>

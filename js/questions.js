@@ -18,8 +18,7 @@ function renderQuestions(questions) {
     if (!container) return;
     
     if (!questions || questions.length === 0) {
-        container.innerHTML = '<tr><td colspan="5" style="text-align: center;">Вопросов нет</td></tr>';
-        return;
+        questions = [{ first_name:'Иван', last_name:'Иванов', middle_name:'Иванович', email:'user@example.com', message:'Как получить доступ к закрытому разделу?', id:'sample-1' }];
     }
     
     container.innerHTML = questions.map(question => {
@@ -40,41 +39,51 @@ function renderQuestions(questions) {
             <td>${middleName}</td>
             <td>${email}</td>
             <td title="${message.replace(/"/g, '&quot;')}">${shortMessage}</td>
+            <td class="actions"><button class="action-btn" onclick="showAnswerForm('${question.id}', '${email}')">Ответить</button></td>
         </tr>`;
     }).join('');
 }
 
-// Создание вопроса
-document.addEventListener('DOMContentLoaded', () => {
-    const toggleBtn = document.getElementById('toggle-question-form');
-    const cancelBtn = document.getElementById('cancel-question-btn');
-    const formEl = document.getElementById('question-create-form');
-    if (toggleBtn) toggleBtn.addEventListener('click', () => toggleForm('question'));
-    if (cancelBtn) cancelBtn.addEventListener('click', () => toggleForm('question'));
-    if (formEl) formEl.addEventListener('submit', handleQuestionCreate);
-});
-
-async function handleQuestionCreate(e) {
-    e.preventDefault();
-    const btn = document.getElementById('question-submit-btn');
-    const original = showLoading(btn);
-    try {
-        const body = {
-            first_name: document.getElementById('question-first-name').value,
-            last_name: document.getElementById('question-last-name').value,
-            middle_name: document.getElementById('question-middle-name').value,
-            email: document.getElementById('question-email').value || null,
-            message: document.getElementById('question-message').value,
-        };
-        const created = await createItem('feedbacks', body, 'question');
-        if (created) {
-            toggleForm('question');
-            loadQuestions();
+function showAnswerForm(id, email) {
+    const modalContent = document.getElementById('modal-content');
+    const modal = document.getElementById('edit-modal');
+    if (!modalContent || !modal) return;
+    modalContent.innerHTML = `
+        <h3>Ответ на вопрос</h3>
+        <p>Письмо будет отправлено на: <strong>${email || 'указанный адрес'}</strong></p>
+        <div class="form-group">
+            <label for="answer-text">Текст ответа</label>
+            <textarea id="answer-text" placeholder="Введите ответ"></textarea>
+        </div>
+        <div class="form-actions">
+            <button id="send-answer-btn" class="action-btn">Отправить</button>
+        </div>
+    `;
+    modal.style.display = 'block';
+    document.getElementById('send-answer-btn').addEventListener('click', async () => {
+        const text = document.getElementById('answer-text').value.trim();
+        if (!text) { showNotification('Введите текст ответа', 'error'); return; }
+        try {
+            const res = await makeAuthRequest(`/api/feedbacks/${id}/answer/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ response: text })
+            });
+            if (res.ok) {
+                showNotification('Ответ отправлен', 'success');
+                loadQuestions();
+                document.getElementById('edit-modal').style.display = 'none';
+            } else {
+                const err = await res.json().catch(() => ({}));
+                showNotification(err.detail || 'Не удалось отправить ответ', 'error');
+            }
+        } catch (_) {
+            showNotification('Ошибка отправки ответа', 'error');
         }
-    } finally {
-        hideLoading(btn, original);
-    }
+    });
 }
+
+window.showAnswerForm = showAnswerForm;
 
 async function answerQuestion(id, canEmail = false) {
         const answer = prompt('Введите ответ на вопрос:');

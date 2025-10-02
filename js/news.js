@@ -52,9 +52,9 @@ async function handleNewsCreate(e) {
     }
 
     // Тип новости: из селекта или создать новый
-    const typeId = document.getElementById('news-type-select')?.value || '';
-    if (!typeId) {
-        showNotification('Не найден тип новости. Создайте тип новости в системе.', 'error');
+    const typeName = (document.getElementById('news-type-name')?.value || '').trim();
+    if (!typeName) {
+        showNotification('Укажите тип новости', 'error');
         return;
     }
 
@@ -64,6 +64,31 @@ async function handleNewsCreate(e) {
     formData.append('image', imageFile);
     formData.append('min_text', minText);
     formData.append('news_date', newsDate);
+    // Получаем id типа по названию (создаем, если нет)
+    let typeId = null;
+    try {
+        const typesRes = await makeAuthRequest('/api/news/types/');
+        if (typesRes.ok) {
+            const types = await typesRes.json();
+            const found = (types || []).find(t => String(t.type).toLowerCase() === typeName.toLowerCase());
+            if (found) typeId = found.id;
+        }
+    } catch (_) {}
+    if (!typeId) {
+        const createRes = await makeAuthRequest('/api/news/types/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: typeName })
+        });
+        if (createRes.ok) {
+            const created = await createRes.json();
+            typeId = created.id;
+        }
+    }
+    if (!typeId) {
+        showNotification('Не удалось определить тип новости', 'error');
+        return;
+    }
     formData.append('type_id', typeId);
     formData.append('keywords', '[]');
 
@@ -71,16 +96,7 @@ async function handleNewsCreate(e) {
 }
 
 // Добавление типа новости
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const res = await makeAuthRequest('/api/news/types/');
-        if (res.ok) {
-            const types = await res.json();
-            const sel = document.getElementById('news-type-select');
-            if (sel) sel.innerHTML = (types || []).map(t => `<option value="${t.id}">${t.type}</option>`).join('');
-        }
-    } catch (_) {}
-});
+// Типы подгружать в инпут не требуется, ввод свободный
 
 // Тоггла статуса у новостей нет в спецификации — действие удалено
 
