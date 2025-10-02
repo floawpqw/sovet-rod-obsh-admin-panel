@@ -49,10 +49,14 @@ async function handleEventCreate(e) {
     try {
         const formData = new FormData();
         formData.append('title', document.getElementById('event-title').value);
-        formData.append('description', '');
-        formData.append('is_active', true);
+        formData.append('description', document.getElementById('event-description').value || '');
+        formData.append('is_active', (document.getElementById('event-status').value || 'active') === 'active');
         const dt = document.getElementById('event-date').value;
         if (dt) formData.append('event_date', new Date(dt).toISOString());
+        const imageFile = document.getElementById('event-image').files[0];
+        if (imageFile) formData.append('image', imageFile);
+        const location = document.getElementById('event-location').value;
+        if (location) formData.append('location', location);
         const created = await createItemWithFile('events', formData, 'event');
         if (created) {
             form.reset();

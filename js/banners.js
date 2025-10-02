@@ -42,7 +42,7 @@ async function handleBannerCreate(e) {
     
     const formData = new FormData();
     formData.append('redirect_url', document.getElementById('banner-link').value || '');
-    const countOrder =  Number(document.getElementById('banner-position').value === 'top' ? 1 : 2);
+    const countOrder = Number(document.getElementById('banner-position').value || '1');
     formData.append('count_order', countOrder);
     formData.append('is_active', document.getElementById('banner-status').value === 'active');
     

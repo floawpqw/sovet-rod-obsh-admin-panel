@@ -53,7 +53,9 @@ async function handleUserInvite(e) {
             toggleForm('user');
         } else {
             const errorData = await response.json().catch(() => ({}));
-            showNotification(errorData.detail || 'Не удалось отправить приглашение', 'error');
+            const detail = (errorData && (errorData.detail || errorData.message)) || '';
+            const isDuplicate = typeof detail === 'string' && /exist|already|существ|дубликат/i.test(detail);
+            showNotification(isDuplicate ? 'Пользователь уже существует' : (detail || 'Не удалось отправить приглашение'), 'error');
         }
     } catch (error) {
         showNotification('Ошибка: ' + error.message, 'error');
