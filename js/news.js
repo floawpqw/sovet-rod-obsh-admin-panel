@@ -41,12 +41,12 @@ async function handleNewsCreate(e) {
     e.preventDefault();
     
     const title = document.getElementById('news-title').value.trim();
-    const body = document.getElementById('news-content').value.trim();
+    const newsUrl = document.getElementById('news-content').value.trim();
     const imageFile = document.getElementById('news-image').files[0];
-    const minText = body.substring(0, 140) || 'text';
+    const minText = (document.getElementById('news-min-text')?.value || '').trim();
     const newsDate = new Date().toISOString().substring(0,10);
 
-    if (!title || !body || !imageFile) {
+    if (!title || !newsUrl || !minText || !imageFile) {
         showNotification('Заполните заголовок, содержание и прикрепите изображение.', 'error');
         return;
     }
@@ -60,10 +60,17 @@ async function handleNewsCreate(e) {
 
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('body', body);
+    formData.append('news_url', newsUrl);
     formData.append('image', imageFile);
     formData.append('min_text', minText);
     formData.append('news_date', newsDate);
+    // Ключевые слова
+    const keywordsRaw = (document.getElementById('news-keywords')?.value || '').trim();
+    const keywords = keywordsRaw ? keywordsRaw.split(',').map(k => k.trim()).filter(Boolean) : [];
+    if (keywords.length === 0) {
+        showNotification('Укажите хотя бы одно ключевое слово', 'error');
+        return;
+    }
     // Получаем id типа по названию (создаем, если нет)
     let typeId = null;
     try {
@@ -90,7 +97,7 @@ async function handleNewsCreate(e) {
         return;
     }
     formData.append('type_id', typeId);
-    formData.append('keywords', '[]');
+    keywords.forEach(kw => formData.append('keywords', kw));
 
     await createItemWithFile('news', formData, 'news');
 }
