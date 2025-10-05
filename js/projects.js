@@ -66,7 +66,7 @@ async function handleProjectCreate(e) {
 
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('body', content);
+    formData.append('project_url', content);
     formData.append('is_active', activeEl.value === 'true');
     formData.append('min_text', teaser);
     formData.append('theme', theme);

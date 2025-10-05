@@ -41,7 +41,9 @@ async function handleBannerCreate(e) {
     e.preventDefault();
     
     const formData = new FormData();
-    formData.append('redirect_url', document.getElementById('banner-link').value || '');
+    // Backend expects title and description, not redirect_url
+    formData.append('title', document.getElementById('banner-title').value || '');
+    formData.append('description', document.getElementById('banner-description').value || '');
     const countOrder = Number(document.getElementById('banner-position').value || '1');
     formData.append('count_order', countOrder);
     formData.append('is_active', document.getElementById('banner-status').value === 'active');
