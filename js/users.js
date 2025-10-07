@@ -63,8 +63,8 @@ function renderUsers(users) {
         const currentUserId = (window.currentUser && (window.currentUser.id || window.currentUser._id || window.currentUser.uuid || window.currentUser.user_id)) || localStorage.getItem('currentUserId') || null;
         const isSelf = currentUserId && userId && (String(currentUserId) === String(userId));
 
-        const isUserRole = String(user && user.role != null ? user.role : '').toLowerCase() === 'user';
-        const editBtn = (userId && isUserRole) ? `<button class="action-btn warning" onclick="editUser('${String(userId)}')">Редактировать</button>` : '';
+        const isAdminRole = String(user && user.role != null ? user.role : '').toLowerCase() === 'admin';
+        const editBtn = (userId && isAdminRole) ? `<button class="action-btn warning" onclick="editUser('${String(userId)}')">Редактировать</button>` : '';
         const deleteBtn = (userId && !isSelf) ? `<button class="action-btn danger" onclick="deleteItem('users', '${String(userId)}', 'user')">Удалить</button>` : '';
         const toggleBtn = (userId && !isSelf) ? `<button class="action-btn secondary" onclick="toggleUserStatus('${String(userId)}', ${user.is_active ? 'true' : 'false'})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>` : '';
 
