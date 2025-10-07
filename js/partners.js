@@ -18,17 +18,15 @@ function renderPartners(partners) {
     if (!container) return;
     
     if (!partners || partners.length === 0) {
-        container.innerHTML = '<tr><td colspan="6" style="text-align: center;">Партнеров нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="3" style="text-align: center;">Партнеров нет</td></tr>';
         return;
     }
     
     container.innerHTML = partners.map(partner => `
         <tr>
-            <td>${partner.id}</td>
             <td>${partner.partner_name}</td>
-            <td>${partner.logo_url ? `<img src="${partner.logo_url}" alt="${partner.partner_name}" style="max-width: 80px; max-height: 60px; border-radius: 4px;">` : 'Нет'}</td>
+            <td>${partner.logo_url ? `<img src="${resolveFileUrl(partner.logo_url)}" alt="${partner.partner_name}" style="max-width: 80px; max-height: 60px; border-radius: 4px;">` : 'Нет'}</td>
             <td>${partner.partner_url || '—'}</td>
-            <td><span class="status-badge status-published">Активен</span></td>
             <td class="actions">
                 <button class="action-btn warning" onclick="editPartner('${partner.id}')">Редактировать</button>
                 <button class="action-btn danger" onclick="deleteItem('partners', '${partner.id}', 'partner')">Удалить</button>

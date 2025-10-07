@@ -21,21 +21,26 @@ function renderContacts(contacts) {
     if (!container) return;
     
     if (!contacts || contacts.length === 0) {
-        container.innerHTML = '<tr><td colspan="7" style="text-align: center;">Контактов нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="6" style="text-align: center;">Контактов нет</td></tr>';
         return;
     }
     
-    container.innerHTML = contacts.map(contact => `
+    container.innerHTML = contacts.map(contact => {
+        const tg = contact.telegram_url || contact.telegram || '';
+        const vk = contact.vk_url || contact.vk || '';
+        return `
         <tr>
-            <td>${contact.address}</td>
-            <td>${contact.email}</td>
+            <td>${contact.address || ''}</td>
+            <td>${contact.email || ''}</td>
             <td>${contact.phone || 'Не указан'}</td>
             <td style="display:flex; align-items:center; gap:10px;">
                 <span>${contact.work_hours || 'Не указаны'}</span>
                 <button class="action-btn" onclick="toggleContactsEdit()">Редактировать</button>
             </td>
-        </tr>
-    `).join('');
+            <td>${tg ? `<a href="${toAbsoluteUrl(tg)}" target="_blank">Открыть</a>` : '—'}</td>
+            <td>${vk ? `<a href="${toAbsoluteUrl(vk)}" target="_blank">Открыть</a>` : '—'}</td>
+        </tr>`;
+    }).join('');
 }
 
 function getContactTypeClass(type) {
@@ -74,6 +79,10 @@ function initContactsEditForm(current) {
                 document.getElementById('contacts-email').value = current.email || '';
                 document.getElementById('contacts-work-hours').value = current.work_hours || '';
                 document.getElementById('contacts-address').value = current.address || '';
+                const tg = document.getElementById('contacts-telegram');
+                const vk = document.getElementById('contacts-vk');
+                if (tg) tg.value = current.telegram_url || current.telegram || '';
+                if (vk) vk.value = current.vk_url || current.vk || '';
             }
         });
     }
@@ -97,6 +106,8 @@ function initContactsEditForm(current) {
                     email: document.getElementById('contacts-email').value || null,
                     work_hours: document.getElementById('contacts-work-hours').value || null,
                     address: document.getElementById('contacts-address').value || null,
+                    telegram_url: document.getElementById('contacts-telegram').value || null,
+                    vk_url: document.getElementById('contacts-vk').value || null,
                 };
                 const res = await makeAuthRequest('/api/contacts/', {
                     method: 'PATCH',

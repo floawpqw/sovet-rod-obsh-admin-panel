@@ -29,9 +29,95 @@ function initEventListeners() {
             handleNavigation(link);
         });
     });
+
+    // Инициализация типов новостей
+    if (typeof loadNewsTypes === 'function') {
+        loadNewsTypes();
+    }
+
+    // Личный кабинет формы
+    const profileForm = document.getElementById('profile-form');
+    if (profileForm) {
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('profile-submit-btn');
+            const original = showLoading(btn);
+            try {
+                const body = {
+                    username: document.getElementById('profile-username').value || undefined,
+                    email: document.getElementById('profile-email').value || undefined,
+                };
+                const res = await makeAuthRequest('/api/users/me/', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) {
+                    showNotification('Профиль обновлён', 'success');
+                    const user = await res.json().catch(() => null);
+                    if (user && typeof applyRoleUI === 'function') applyRoleUI(user);
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showNotification(err.detail || 'Не удалось обновить профиль', 'error');
+                }
+            } finally {
+                hideLoading(btn, original);
+            }
+        });
+    }
+
+    const passwordForm = document.getElementById('password-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const new1 = document.getElementById('new-password').value;
+            const new2 = document.getElementById('new-password2').value;
+            if (!new1 || new1 !== new2) {
+                showNotification('Пароли не совпадают', 'error');
+                return;
+            }
+            const btn = document.getElementById('password-submit-btn');
+            const original = showLoading(btn);
+            try {
+                const body = {
+                    old_password: document.getElementById('old-password').value || '',
+                    new_password: new1,
+                };
+                const res = await makeAuthRequest('/api/auth/change-password/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) {
+                    showNotification('Пароль изменён', 'success');
+                    passwordForm.reset();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showNotification(err.detail || 'Не удалось изменить пароль', 'error');
+                }
+            } finally {
+                hideLoading(btn, original);
+            }
+        });
+    }
 }
 
 function initForms() {
+    // Роль-ориентированная навигация: скрыть вкладку Пользователи для role=user
+    (async () => {
+        try {
+            const me = typeof verifyAuth === 'function' ? await (async () => {
+                const r = await makeAuthRequest('/api/users/me/');
+                if (!r.ok) return null;
+                return await r.json();
+            })() : null;
+            const usersTab = document.querySelector('a[href="#users"]').parentElement;
+            if (me && me.role !== 'admin' && usersTab) {
+                usersTab.style.display = 'none';
+            }
+        } catch (_) {}
+    })();
+
     // Форма пользователя
     const toggleUserForm = document.getElementById('toggle-user-form');
     const cancelUserBtn = document.getElementById('cancel-user-btn');
@@ -130,6 +216,68 @@ function initForms() {
         if (toggleEventForm) toggleEventForm.addEventListener('click', () => toggleForm('event'));
         if (cancelEventBtn) cancelEventBtn.addEventListener('click', () => toggleForm('event'));
         if (eventCreateForm) eventCreateForm.addEventListener('submit', handleEventCreate);
+
+        // Личный кабинет формы
+        const profileForm = document.getElementById('profile-form');
+        const passwordForm = document.getElementById('password-form');
+        (async () => {
+            try {
+                const r = await makeAuthRequest('/api/users/me/');
+                if (r.ok) {
+                    const me = await r.json();
+                    const emailEl = document.getElementById('profile-email');
+                    const usernameEl = document.getElementById('profile-username');
+                    if (emailEl) emailEl.value = me.email || '';
+                    if (usernameEl) usernameEl.value = me.username || '';
+                }
+            } catch (_) {}
+        })();
+        if (profileForm) profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('profile-submit-btn');
+            const original = showLoading(btn);
+            try {
+                const body = {
+                    email: document.getElementById('profile-email').value,
+                    username: document.getElementById('profile-username').value,
+                };
+                const res = await makeAuthRequest('/api/users/me/', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) {
+                    showNotification('Профиль обновлен', 'success');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showNotification(err.detail || 'Не удалось обновить профиль', 'error');
+                }
+            } finally {
+                hideLoading(btn, original);
+            }
+        });
+        if (passwordForm) passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('password-submit-btn');
+            const original = showLoading(btn);
+            try {
+                const body = { password: document.getElementById('profile-password').value };
+                const res = await makeAuthRequest('/api/users/change-password/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) {
+                    showNotification('Пароль изменен', 'success');
+                    document.getElementById('profile-password').value = '';
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showNotification(err.detail || 'Не удалось изменить пароль', 'error');
+                }
+            } finally {
+                hideLoading(btn, original);
+            }
+        });
     }
 
 function handleNavigation(link) {
@@ -161,6 +309,18 @@ function handleNavigation(link) {
                 case 'contacts': loadContacts(); break;
                 case 'questions': loadQuestions(); break;
                 case 'events': loadEvents(); break;
+                case 'profile':
+                    if (typeof verifyAuth === 'function') {
+                        verifyAuth().then(user => {
+                            if (user) {
+                                const uEl = document.getElementById('profile-username');
+                                const eEl = document.getElementById('profile-email');
+                                if (uEl) uEl.value = user.username || '';
+                                if (eEl) eEl.value = user.email || '';
+                            }
+                        });
+                    }
+                    break;
         }
     }
 }

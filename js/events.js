@@ -18,7 +18,7 @@ function renderEvents(events) {
     if (!container) return;
     
     if (!events || events.length === 0) {
-        container.innerHTML = '<tr><td colspan="5" style="text-align: center;">Мероприятий нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="4" style="text-align: center;">Мероприятий нет</td></tr>';
         return;
     }
     
@@ -27,13 +27,12 @@ function renderEvents(events) {
         const title = eventItem.title || '';
         const dateRaw = eventItem.event_date || null;
         const dateStr = dateRaw ? new Date(dateRaw).toLocaleString() : '';
-        const status = eventItem.is_active ? 'active' : '';
+        const status = eventItem.is_active ? 'Активен' : 'Неактивен';
         return `
         <tr>
-            <td>${id}</td>
             <td>${title}</td>
             <td>${dateStr}</td>
-            <td>${status}</td>
+            <td><span class="status-badge ${eventItem.is_active ? 'status-published' : 'status-draft'}">${status}</span></td>
             <td class="actions">
                 <button class="action-btn danger" onclick="deleteItem('events', '${id}', 'event')">Удалить</button>
             </td>

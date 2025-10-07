@@ -18,13 +18,12 @@ function renderSubscriptions(subscriptions) {
     if (!container) return;
     
     if (!subscriptions || subscriptions.length === 0) {
-        container.innerHTML = '<tr><td colspan="7" style="text-align: center;">Подписок нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="6" style="text-align: center;">Подписок нет</td></tr>';
         return;
     }
     
         container.innerHTML = subscriptions.map(subscription => `
         <tr>
-            <td>${subscription.id}</td>
             <td>${subscription.email}</td>
             <td>—</td>
             <td>—</td>
@@ -75,18 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!form) return;
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
             toggleBtn.textContent = form.style.display === 'none' ? '+ Сделать рассылку' : '− Скрыть форму';
-            if (form.style.display === 'block') {
-                // загрузить типы новостей
-                try {
-                    const res = await makeAuthRequest('/api/news/types/');
-                    if (res.ok) {
-                        const types = await res.json();
-                        const sel = document.getElementById('mailing-type');
-                        if (sel) {
-                            sel.innerHTML = (types || []).map(t => `<option value="${t.id}">${t.type}</option>`).join('');
-                        }
-                    }
-                } catch (_) {}
+            if (form.style.display === 'block' && typeof loadNewsTypes === 'function') {
+                loadNewsTypes();
             }
         });
     }

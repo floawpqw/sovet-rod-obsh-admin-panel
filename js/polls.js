@@ -18,15 +18,14 @@ function renderPolls(polls) {
     if (!container) return;
     
     if (!polls || polls.length === 0) {
-        container.innerHTML = '<tr><td colspan="6" style="text-align: center;">Опросов нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="5" style="text-align: center;">Опросов нет</td></tr>';
         return;
     }
     
     container.innerHTML = polls.map(poll => `
         <tr>
-            <td>${poll.id}</td>
-            <td>${poll.theme}</td>
-            <td>${(poll.questions || []).length}</td>
+            <td>${poll.title || poll.theme || ''}</td>
+            <td>${Array.isArray(poll.options) ? poll.options.length : (poll.questions || []).length}</td>
             <td>—</td>
             <td><span class="status-badge ${poll.is_active ? 'status-published' : 'status-draft'}">${poll.is_active ? 'Активен' : 'Неактивен'}</span></td>
             <td class="actions">
@@ -40,9 +39,25 @@ function renderPolls(polls) {
 async function handlePollCreate(e) {
     e.preventDefault();
     
+    const title = document.getElementById('poll-question').value;
+    const isActive = document.getElementById('poll-status').value !== 'inactive';
+    const startAt = document.getElementById('poll-start-date').value;
+    const endAt = document.getElementById('poll-end-date').value;
+
+    const optionsContainer = document.getElementById('poll-options-container');
+    const optionInputs = optionsContainer ? optionsContainer.querySelectorAll('input[name="poll-options[]"]') : [];
+    const options = Array.from(optionInputs).map(i => i.value.trim()).filter(Boolean);
+    if (options.length < 2) {
+        showNotification('Добавьте минимум два варианта ответа', 'error');
+        return;
+    }
+
     const body = {
-        theme: document.getElementById('poll-question').value,
-        is_active: document.getElementById('poll-status').value !== 'inactive',
+        title,
+        is_active: isActive,
+        options,
+        start_at: startAt ? new Date(startAt).toISOString() : null,
+        end_at: endAt ? new Date(endAt).toISOString() : null,
     };
     const created = await createItem('polls', body, 'poll');
     if (!created) return;
@@ -134,5 +149,5 @@ async function editPoll(id) {
 }
 
 // Глобальные функции
-window.viewPollResults = viewPollResults;
+window.viewPollResults = showPollResultsModal;
 window.editPoll = editPoll;

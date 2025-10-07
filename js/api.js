@@ -21,36 +21,22 @@ async function refreshAccessToken() {
 }
 
 async function makeAuthRequest(url, options = {}) {
-    const headers = {
-        ...options.headers
-    };
-    if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
-    }
+    const headers = { ...options.headers };
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    const doFetch = async () => fetch(`${API_BASE}${url}`, { ...options, headers });
     try {
-        const response = await fetch(`${API_BASE}${url}`, {
-            ...options,
-            headers
-        });
-        if (response.status !== 401) {
-            return response;
-        }
-        // 401: try refresh once
+        let response = await doFetch();
+        if (response.status !== 401) return response;
         const didRefresh = await refreshAccessToken();
-        if (didRefresh) {
-            const retryHeaders = {
-                ...options.headers
-            };
-            if (authToken) retryHeaders['Authorization'] = `Bearer ${authToken}`;
-            const retryResponse = await fetch(`${API_BASE}${url}`, {
-                ...options,
-                headers: retryHeaders
-            });
-            if (retryResponse.status !== 401) return retryResponse;
+        if (!didRefresh) {
+            clearTokens();
+            showAuthForm();
+            throw new Error('Требуется авторизация');
         }
-        clearTokens();
-        showAuthForm();
-        throw new Error('Требуется авторизация');
+        const retryHeaders = { ...options.headers };
+        if (authToken) retryHeaders['Authorization'] = `Bearer ${authToken}`;
+        response = await fetch(`${API_BASE}${url}`, { ...options, headers: retryHeaders });
+        return response;
     } catch (error) {
         console.error('API Request error:', error);
         throw error;
@@ -74,12 +60,17 @@ async function apiLogout() {
 }
 
 window.verifyAuth = async function verifyAuth() {
-    if (!authToken) return false;
+    if (!authToken) return null;
     try {
         const response = await makeAuthRequest('/api/users/me/');
-        return response.ok;
+        if (!response.ok) return null;
+        const user = await response.json().catch(() => null);
+        if (user && typeof applyRoleUI === 'function') {
+            applyRoleUI(user);
+        }
+        return user;
     } catch (_) {
-        return false;
+        return null;
     }
 };
 

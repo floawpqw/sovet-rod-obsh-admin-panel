@@ -18,18 +18,16 @@ function renderDocuments(documents) {
     if (!container) return;
     
     if (!documents || documents.length === 0) {
-        container.innerHTML = '<tr><td colspan="7" style="text-align: center;">Документов нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="4" style="text-align: center;">Документов нет</td></tr>';
         return;
     }
     
     container.innerHTML = documents.map(document => `
         <tr>
-            <td>${document.id}</td>
             <td>${document.title}</td>
-            <td>${getDocumentCategoryText(document.category || 'other')}</td>
             <td>
                 ${document.file_url ? 
-                    `<a href="${document.file_url}" target="_blank" style="color: var(--primary-red); text-decoration: none;">
+                    `<a href="${toAbsoluteUrl(document.file_url)}" target="_blank" style="color: var(--primary-red); text-decoration: none;">
                         ${getFileIcon(document.file_url)} ${getFileName(document.file_url)}
                     </a>` : 
                     'Файл не загружен'
@@ -40,7 +38,7 @@ function renderDocuments(documents) {
             <td class="actions">
                 <button class="action-btn warning" onclick="editDocument(${document.id})">Редактировать</button>
                 <button class="action-btn danger" onclick="deleteItem('documents', ${document.id}, 'document')">Удалить</button>
-                ${document.file_url ? `<button class="action-btn" onclick="downloadDocument('${document.file_url}')">Скачать</button>` : ''}
+                ${document.file_url ? `<button class="action-btn" onclick="downloadDocument('${toAbsoluteUrl(document.file_url)}')">Скачать</button>` : ''}
             </td>
         </tr>
     `).join('');
@@ -98,6 +96,9 @@ async function handleDocumentCreate(e) {
 }
 
 function downloadDocument(url) {
+    const headers = {};
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    // Открываем прямую ссылку; если требуется авторизация по заголовку, используем X-Accel-Redirect на бекенде
     window.open(url, '_blank');
 }
 
