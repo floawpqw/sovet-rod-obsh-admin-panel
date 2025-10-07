@@ -34,6 +34,7 @@
                     <ul class="nav-links">
                         <li><a href="#users" class="nav-link active">Пользователи</a></li>
                         <li><a href="#news" class="nav-link">Новости</a></li>
+                        <li><a href="#profile" class="nav-link">Личный кабинет</a></li>
                         <li><a href="#projects" class="nav-link">Проекты</a></li>
                         <li><a href="#banners" class="nav-link">Баннеры</a></li>
                         <li><a href="#partners" class="nav-link">Партнеры</a></li>
@@ -75,7 +76,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Имя</th>
                             <th>Email</th>
                             <th>Логин</th>
@@ -86,7 +86,7 @@
                     </thead>
                     <tbody id="users-list">
                         <tr>
-                            <td colspan="7" style="text-align: center;">Загрузка...</td>
+                            <td colspan="6" style="text-align: center;">Загрузка...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -107,8 +107,12 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="news-type-name">Тип новости *</label>
-                            <input type="text" id="news-type-name" required placeholder="Например: Объявления">
+                            <label for="news-type">Тип новости *</label>
+                            <select id="news-type" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="news-date">Дата новости</label>
+                            <input type="date" id="news-date">
                         </div>
                         
                         <div class="form-group">
@@ -147,11 +151,34 @@
                         </div>
                     </form>
                 </div>
+
+                <!-- Типы новостей -->
+                <div id="news-types-wrapper" class="add-form" style="margin-top: 20px;">
+                    <h3>Типы новостей</h3>
+                    <form id="news-type-create-form" style="margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label for="news-type-create-input">Новый тип *</label>
+                            <input type="text" id="news-type-create-input" required placeholder="Например: Объявления">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="news-type-submit-btn">Добавить тип</button>
+                        </div>
+                    </form>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Тип</th>
+                            </tr>
+                        </thead>
+                        <tbody id="news-types-list">
+                            <tr><td style="text-align:center;">Загрузка типов...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
                 
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Заголовок</th>
                             <th>Изображение</th>
                             <th>Статус</th>
@@ -161,7 +188,7 @@
                     </thead>
                     <tbody id="news-list">
                         <tr>
-                            <td colspan="6" style="text-align: center;">Загрузка новостей...</td>
+                            <td colspan="5" style="text-align: center;">Загрузка новостей...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -216,28 +243,12 @@
                         
                         <div class="form-group">
                             <label for="project-theme">Тематика проекта *</label>
-                            <select id="project-theme" required>
-                                <option value="">Не выбрано</option>
-                                <option value="education">Образование</option>
-                                <option value="upbringing">Воспитание</option>
-                                <option value="culture">Культура</option>
-                                <option value="sport">Спорт</option>
-                                <option value="health">Здоровье</option>
-                                <option value="other">Другое</option>
-                            </select>
+                            <input type="text" id="project-theme" required placeholder="Введите тематику проекта">
                         </div>
                         
                         <div class="form-group">
                             <label for="project-category">Категория *</label>
-                            <select id="project-category" required>
-                                <option value="">Не выбрано</option>
-                                <option value="parents">Для родителей</option>
-                                <option value="teachers">Для учителей</option>
-                                <option value="students">Для учеников</option>
-                                <option value="administration">Для администрации</option>
-                                <option value="community">Для сообщества</option>
-                                <option value="other">Прочее</option>
-                            </select>
+                            <input type="text" id="project-category" required placeholder="Введите категорию проекта">
                         </div>
                         
                         <div class="form-actions">
@@ -250,7 +261,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Название</th>
                             <th>Изображение</th>
                             <th>Статус</th>
@@ -260,7 +270,7 @@
                     </thead>
                     <tbody id="projects-list">
                         <tr>
-                            <td colspan="6" style="text-align: center;">Загрузка проектов...</td>
+                            <td colspan="5" style="text-align: center;">Загрузка проектов...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -322,7 +332,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            
                             <th>Название</th>
                             <th>Изображение</th>
                             <th>Позиция</th>
@@ -332,7 +342,7 @@
                     </thead>
                     <tbody id="banners-list">
                         <tr>
-                            <td colspan="6" style="text-align: center;">Загрузка баннеров...</td>
+                            <td colspan="5" style="text-align: center;">Загрузка баннеров...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -376,15 +386,15 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Название</th>
                             <th>Логотип</th>
+                            <th>Сайт</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody id="partners-list">
                         <tr>
-                            <td colspan="6" style="text-align: center;">Загрузка партнеров...</td>
+                            <td colspan="4" style="text-align: center;">Загрузка партнеров...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -453,7 +463,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Вопрос</th>
                             <th>Вариантов</th>
                             <th>Голосов</th>
@@ -463,7 +472,7 @@
                     </thead>
                     <tbody id="polls-list">
                         <tr>
-                            <td colspan="6" style="text-align: center;">Загрузка опросов...</td>
+                            <td colspan="5" style="text-align: center;">Загрузка опросов...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -505,7 +514,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Email</th>
                             <th>Имя</th>
                             <th>Тип</th>
@@ -516,7 +524,7 @@
                     </thead>
                     <tbody id="subscriptions-list">
                         <tr>
-                            <td colspan="7" style="text-align: center;">Загрузка подписок...</td>
+                            <td colspan="6" style="text-align: center;">Загрузка подписок...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -542,25 +550,7 @@
                             <small>Поддерживаемые форматы: PDF, DOC, DOCX, XLS, XLSX, TXT</small>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="document-category">Категория</label>
-                            <select id="document-category">
-                                <option value="legal">Юридические</option>
-                                <option value="technical">Технические</option>
-                                <option value="financial">Финансовые</option>
-                                <option value="marketing">Маркетинг</option>
-                                <option value="other">Другие</option>
-                            </select>
-                        </div>
                         
-                        <div class="form-group">
-                            <label for="document-access">Доступ</label>
-                            <select id="document-access">
-                                <option value="public">Публичный</option>
-                                <option value="private">Приватный</option>
-                                <option value="restricted">Ограниченный</option>
-                            </select>
-                        </div>
                         
                         <div class="form-group">
                             <label for="document-status">Статус</label>
@@ -581,18 +571,15 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Название</th>
-                            <th>Категория</th>
                             <th>Файл</th>
                             <th>Размер</th>
-                            <th>Доступ</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody id="documents-list">
                         <tr>
-                            <td colspan="7" style="text-align: center;">Загрузка документов...</td>
+                            <td colspan="4" style="text-align: center;">Загрузка документов...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -643,11 +630,13 @@
                             <th>Email</th>
                             <th>Телефон</th>
                             <th>Часы работы</th>
+                            <th>Telegram</th>
+                            <th>VK</th>
                         </tr>
                     </thead>
                     <tbody id="contacts-list">
                         <tr>
-                            <td colspan="4" style="text-align: center;">Загрузка контактов...</td>
+                            <td colspan="6" style="text-align: center;">Загрузка контактов...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -722,7 +711,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Название</th>
                             <th>Дата</th>
                             <th>Статус</th>
@@ -731,10 +719,51 @@
                     </thead>
                     <tbody id="events-list">
                         <tr>
-                            <td colspan="5" style="text-align: center;">Загрузка мероприятий...</td>
+                            <td colspan="4" style="text-align: center;">Загрузка мероприятий...</td>
                         </tr>
                     </tbody>
                 </table>
+            </section>
+
+            <!-- Личный кабинет -->
+            <section id="profile" class="content-section">
+                <h2>Личный кабинет</h2>
+                <div class="add-form">
+                    <h3>Мои данные</h3>
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label for="profile-username">Имя пользователя</label>
+                            <input type="text" id="profile-username" placeholder="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-email">Email</label>
+                            <input type="email" id="profile-email" placeholder="user@example.com">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="profile-submit-btn">Сохранить</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="add-form">
+                    <h3>Смена пароля</h3>
+                    <form id="password-form">
+                        <div class="form-group">
+                            <label for="old-password">Текущий пароль</label>
+                            <input type="password" id="old-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Новый пароль</label>
+                            <input type="password" id="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password2">Повторите новый пароль</label>
+                            <input type="password" id="new-password2">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="password-submit-btn">Изменить пароль</button>
+                        </div>
+                    </form>
+                </div>
             </section>
         </div>
     </div>

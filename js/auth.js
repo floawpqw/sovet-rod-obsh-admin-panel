@@ -1,8 +1,8 @@
 // Обработка авторизации
 document.addEventListener('DOMContentLoaded', async () => {
     if (authToken && typeof verifyAuth === 'function') {
-        const ok = await verifyAuth();
-        if (ok) {
+        const user = await verifyAuth();
+        if (user) {
             showAdminPanel();
             if (typeof loadUsers === 'function') loadUsers();
             if (typeof loadSystemStats === 'function') loadSystemStats();
@@ -41,8 +41,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             if (access) {
                 if (typeof setTokens === 'function') setTokens(access, refresh);
                 // Verify token before showing UI
-                const ok = typeof verifyAuth === 'function' ? await verifyAuth() : false;
-                if (ok) {
+                const user = typeof verifyAuth === 'function' ? await verifyAuth() : null;
+                if (user) {
                     showAdminPanel();
                     if (typeof loadUsers === 'function') loadUsers();
                     if (typeof loadSystemStats === 'function') loadSystemStats();

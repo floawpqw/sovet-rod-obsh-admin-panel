@@ -74,12 +74,17 @@ async function apiLogout() {
 }
 
 window.verifyAuth = async function verifyAuth() {
-    if (!authToken) return false;
+    if (!authToken) return null;
     try {
         const response = await makeAuthRequest('/api/users/me/');
-        return response.ok;
+        if (!response.ok) return null;
+        const user = await response.json().catch(() => null);
+        if (user && typeof applyRoleUI === 'function') {
+            applyRoleUI(user);
+        }
+        return user;
     } catch (_) {
-        return false;
+        return null;
     }
 };
 

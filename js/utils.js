@@ -200,3 +200,353 @@ function getPollStatusText(status) {
     };
     return texts[status] || status;
 }
+
+// Преобразование ссылок на медиа/файлы в абсолютные URL
+function toAbsoluteUrl(url) {
+    if (!url) return '';
+    try {
+        // уже абсолютный
+        const u = new URL(url, API_BASE);
+        // Если url начинается с http(s), URL вернёт исходный
+        // Если относительный (начинается с / или без слэша), базой будет API_BASE
+        return u.href;
+    } catch (_) {
+        return url;
+    }
+}
+
+// Глобальный рефреш данных списков после CRUD
+window.refreshData = function refreshData(endpointKey) {
+    try {
+        switch (endpointKey) {
+            case 'users':
+                if (typeof loadUsers === 'function') loadUsers();
+                break;
+            case 'news':
+                if (typeof loadNews === 'function') loadNews();
+                if (typeof loadNewsTypes === 'function') loadNewsTypes();
+                break;
+            case 'projects':
+                if (typeof loadProjects === 'function') loadProjects();
+                break;
+            case 'banners':
+                if (typeof loadBanners === 'function') loadBanners();
+                break;
+            case 'partners':
+                if (typeof loadPartners === 'function') loadPartners();
+                break;
+            case 'polls':
+                if (typeof loadPolls === 'function') loadPolls();
+                break;
+            case 'subscriptions':
+                if (typeof loadSubscriptions === 'function') loadSubscriptions();
+                break;
+            case 'documents':
+                if (typeof loadDocuments === 'function') loadDocuments();
+                break;
+            case 'contacts':
+                if (typeof loadContacts === 'function') loadContacts();
+                break;
+            case 'questions':
+                if (typeof loadQuestions === 'function') loadQuestions();
+                break;
+            case 'events':
+                if (typeof loadEvents === 'function') loadEvents();
+                break;
+            default:
+                // No-op
+                break;
+        }
+    } catch (e) {
+        console.error('refreshData error:', e);
+    }
+};
+
+// Текущий пользователь и роль-зависимый UI
+window.currentUser = null;
+function applyRoleUI(user) {
+    try {
+        window.currentUser = user || null;
+        const usersNavLink = document.querySelector('a.nav-link[href="#users"]');
+        const usersSection = document.getElementById('users');
+        const isAdmin = Boolean(user && (user.role === 'admin' || user.is_admin === true));
+        if (usersNavLink) {
+            if (!isAdmin) {
+                // скрыть вкладку "Пользователи" для не-админа
+                const li = usersNavLink.closest('li');
+                if (li) li.style.display = 'none';
+                if (usersSection) usersSection.style.display = 'none';
+            } else {
+                const li = usersNavLink.closest('li');
+                if (li) li.style.display = '';
+            }
+        }
+    } catch (e) {
+        console.warn('applyRoleUI error:', e);
+    }
+}
+
+window.toAbsoluteUrl = toAbsoluteUrl;
+window.applyRoleUI = applyRoleUI;
+
+// Универсальное модальное окно редактирования
+function formatDateYYYYMMDD(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function formatDateTimeLocal(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${y}-${m}-${day}T${hh}:${mm}`;
+}
+
+const editConfigs = {
+    user: {
+        endpoint: (id) => `/api/users/${id}/`,
+        fields: [
+            { name: 'username', label: 'Имя пользователя', type: 'text' },
+            { name: 'email', label: 'Email', type: 'email' },
+        ],
+        content: 'json'
+    },
+    news: {
+        endpoint: (id) => `/api/news/${id}/`,
+        fields: [
+            { name: 'title', label: 'Заголовок', type: 'text' },
+            { name: 'news_url', label: 'Ссылка на новость', type: 'textarea' },
+            { name: 'min_text', label: 'Краткий текст', type: 'textarea' },
+            { name: 'news_date', label: 'Дата новости', type: 'date', formatOut: (v) => v },
+            { name: 'type_id', label: 'Тип новости', type: 'select', source: 'newsTypes' },
+            { name: 'image', label: 'Изображение', type: 'file' },
+        ],
+        content: 'form'
+    },
+    project: {
+        endpoint: (id) => `/api/projects/${id}/`,
+        fields: [
+            { name: 'title', label: 'Заголовок', type: 'text' },
+            { name: 'project_url', label: 'Ссылка на проект', type: 'textarea' },
+            { name: 'min_text', label: 'Краткий текст', type: 'textarea' },
+            { name: 'theme', label: 'Тематика', type: 'text' },
+            { name: 'category', label: 'Категория', type: 'text' },
+            { name: 'is_active', label: 'Активен', type: 'checkbox' },
+            { name: 'keywords', label: 'Ключевые слова (через запятую)', type: 'text', serialize: 'csv' },
+            { name: 'image', label: 'Изображение', type: 'file' },
+        ],
+        content: 'form'
+    },
+    banner: {
+        endpoint: (id) => `/api/banners/${id}/`,
+        fields: [
+            { name: 'title', label: 'Название', type: 'text' },
+            { name: 'description', label: 'Описание', type: 'textarea' },
+            { name: 'count_order', label: 'Позиция', type: 'number' },
+            { name: 'is_active', label: 'Активен', type: 'checkbox' },
+            { name: 'image', label: 'Изображение', type: 'file' },
+        ],
+        content: 'form'
+    },
+    partner: {
+        endpoint: (id) => `/api/partners/${id}/`,
+        fields: [
+            { name: 'partner_name', label: 'Название партнера', type: 'text' },
+            { name: 'partner_url', label: 'Сайт', type: 'text' },
+            { name: 'count_order', label: 'Порядок', type: 'number' },
+            { name: 'logo', label: 'Логотип', type: 'file' },
+        ],
+        content: 'form'
+    },
+    poll: {
+        endpoint: (id) => `/api/polls/${id}/`,
+        fields: [
+            { name: 'title', label: 'Вопрос', type: 'text' },
+            { name: 'is_active', label: 'Активен', type: 'checkbox' },
+            { name: 'options', label: 'Варианты (по одному в строке)', type: 'textarea', serialize: 'lines' },
+        ],
+        content: 'json'
+    },
+    document: {
+        endpoint: (id) => `/api/documents/${id}/`,
+        fields: [
+            { name: 'title', label: 'Название', type: 'text' },
+            { name: 'is_active', label: 'Активен', type: 'checkbox' },
+            { name: 'file', label: 'Файл', type: 'file' },
+        ],
+        content: 'form'
+    },
+    event: {
+        endpoint: (id) => `/api/events/${id}/`,
+        fields: [
+            { name: 'title', label: 'Название', type: 'text' },
+            { name: 'description', label: 'Описание', type: 'textarea' },
+            { name: 'event_date', label: 'Дата события', type: 'datetime-local' },
+            { name: 'location', label: 'Локация', type: 'text' },
+            { name: 'is_active', label: 'Активен', type: 'checkbox' },
+            { name: 'image', label: 'Изображение', type: 'file' },
+        ],
+        content: 'form'
+    },
+};
+
+function getEditFieldValue(type, fieldName, data) {
+    const value = data[fieldName];
+    if (fieldName === 'news_date') return formatDateYYYYMMDD(value);
+    if (fieldName === 'event_date') return formatDateTimeLocal(value);
+    if (fieldName === 'type_id') return data.type_id || (data.type && data.type.id) || '';
+    if (fieldName === 'options' && Array.isArray(data.options)) return (data.options || []).join('\n');
+    if (fieldName === 'keywords' && Array.isArray(data.keywords)) return (data.keywords || []).join(', ');
+    if (typeof value === 'boolean') return value;
+    return value == null ? '' : value;
+}
+
+window.showEditModal = function showEditModal(type, data) {
+    currentEditType = type;
+    currentEditId = data && (data.id || data._id || data.uuid);
+    const config = editConfigs[type];
+    const modalContent = document.getElementById('modal-content');
+    const modal = document.getElementById('edit-modal');
+    if (!config || !modalContent || !modal) return;
+
+    let formHtml = `<h3>Редактировать ${getTypeName(type)}</h3><form id="edit-form">`;
+    config.fields.forEach(f => {
+        const val = getEditFieldValue(type, f.name, data);
+        formHtml += `<div class="form-group">`;
+        if (f.type !== 'checkbox') {
+            formHtml += `<label for="edit-${f.name}">${f.label}</label>`;
+        }
+        if (f.type === 'textarea') {
+            formHtml += `<textarea id="edit-${f.name}" ${f.required ? 'required' : ''}>${val || ''}</textarea>`;
+        } else if (f.type === 'select') {
+            formHtml += `<select id="edit-${f.name}"></select>`;
+        } else if (f.type === 'checkbox') {
+            formHtml += `<label><input type="checkbox" id="edit-${f.name}" ${val ? 'checked' : ''}> ${f.label}</label>`;
+        } else if (f.type === 'file') {
+            formHtml += `<input type="file" id="edit-${f.name}">`;
+        } else {
+            formHtml += `<input type="${f.type}" id="edit-${f.name}" value="${val || ''}">`;
+        }
+        formHtml += `</div>`;
+    });
+    formHtml += `<div class="form-actions">
+        <button type="submit" id="edit-submit-btn">Сохранить</button>
+        <button type="button" id="edit-cancel-btn" class="secondary">Отмена</button>
+    </div></form>`;
+
+    modalContent.innerHTML = formHtml;
+    modal.style.display = 'block';
+
+    // Инициализация источников для селектов
+    config.fields.forEach(f => {
+        if (f.type === 'select' && f.source === 'newsTypes') {
+            if (typeof loadNewsTypes === 'function') {
+                loadNewsTypes().then(() => {
+                    const sel = document.getElementById(`edit-${f.name}`);
+                    const current = getEditFieldValue(type, f.name, data);
+                    if (sel && current != null) sel.value = String(current);
+                }).catch(() => {});
+            }
+        }
+    });
+
+    const form = document.getElementById('edit-form');
+    const cancelBtn = document.getElementById('edit-cancel-btn');
+    if (cancelBtn) cancelBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await submitEdit(config);
+        });
+    }
+};
+
+async function submitEdit(config) {
+    const btn = document.getElementById('edit-submit-btn');
+    const original = showLoading(btn);
+    try {
+        const method = 'PATCH';
+        let options = { method };
+        if (config.content === 'form') {
+            const fd = new FormData();
+            for (const f of config.fields) {
+                if (f.type === 'file') {
+                    const fileInput = document.getElementById(`edit-${f.name}`);
+                    const file = fileInput && fileInput.files && fileInput.files[0];
+                    if (file) fd.append(f.name, file);
+                } else if (f.serialize === 'csv') {
+                    const raw = document.getElementById(`edit-${f.name}`)?.value || '';
+                    const items = raw.split(',').map(s => s.trim()).filter(Boolean);
+                    if (f.name === 'keywords') {
+                        items.forEach(it => fd.append('keywords', it));
+                    } else {
+                        fd.append(f.name, items.join(','));
+                    }
+                } else if (f.type === 'checkbox') {
+                    const el = document.getElementById(`edit-${f.name}`);
+                    fd.append(f.name, el && el.checked ? true : false);
+                } else {
+                    const val = document.getElementById(`edit-${f.name}`)?.value;
+                    if (val !== undefined) fd.append(f.name, val);
+                }
+            }
+            options.body = fd;
+        } else {
+            const body = {};
+            for (const f of config.fields) {
+                if (f.type === 'file') continue;
+                if (f.serialize === 'lines') {
+                    const raw = document.getElementById(`edit-${f.name}`)?.value || '';
+                    body[f.name] = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+                } else if (f.type === 'checkbox') {
+                    const el = document.getElementById(`edit-${f.name}`);
+                    body[f.name] = el && el.checked ? true : false;
+                } else if (f.serialize === 'csv') {
+                    const raw = document.getElementById(`edit-${f.name}`)?.value || '';
+                    body[f.name] = raw.split(',').map(s => s.trim()).filter(Boolean);
+                } else {
+                    body[f.name] = document.getElementById(`edit-${f.name}`)?.value || null;
+                }
+            }
+            options.headers = { 'Content-Type': 'application/json' };
+            options.body = JSON.stringify(body);
+        }
+
+        const endpointUrl = config.endpoint(currentEditId);
+        const res = await makeAuthRequest(endpointUrl, options);
+        if (res.ok) {
+            showNotification('Изменения сохранены');
+            const modal = document.getElementById('edit-modal');
+            if (modal) modal.style.display = 'none';
+            // refresh by type
+            const typeToEndpoint = {
+                user: 'users',
+                news: 'news',
+                project: 'projects',
+                banner: 'banners',
+                partner: 'partners',
+                poll: 'polls',
+                document: 'documents',
+                event: 'events',
+            };
+            if (typeof refreshData === 'function') refreshData(typeToEndpoint[currentEditType]);
+        } else {
+            const err = await res.json().catch(() => ({}));
+            showNotification(err.detail || 'Не удалось сохранить изменения', 'error');
+        }
+    } catch (e) {
+        showNotification('Ошибка сохранения', 'error');
+    } finally {
+        hideLoading(btn, original);
+    }
+}
+
+window.showEditModal = showEditModal;

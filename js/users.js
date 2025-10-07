@@ -18,13 +18,14 @@ function renderUsers(users) {
     if (!container) return;
     
     if (!users || users.length === 0) {
-        container.innerHTML = '<tr><td colspan="7" style="text-align: center;">Пользователей нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="6" style="text-align: center;">Пользователей нет</td></tr>';
         return;
     }
     
-    container.innerHTML = users.map(user => `
+    container.innerHTML = users.map(user => {
+        const isSelf = window.currentUser && (String(window.currentUser.id) === String(user.id));
+        return `
         <tr>
-            <td>${user.id || '—'}</td>
             <td>${user.username || 'Не указано'}</td>
             <td>${user.email || ''}</td>
             <td>${user.username || ''}</td>
@@ -32,11 +33,11 @@ function renderUsers(users) {
             <td><span class="status-badge ${user.is_active ? 'status-published' : 'status-draft'}">${user.is_active ? 'Активен' : 'Неактивен'}</span></td>
             <td class="actions">
                 ${user.id ? `<button class="action-btn warning" onclick="editUser('${user.id}')">Редактировать</button>` : ''}
-                ${user.id ? `<button class="action-btn danger" onclick="deleteItem('users', '${user.id}', 'user')">Удалить</button>` : ''}
-                ${user.id ? `<button class="action-btn secondary" onclick="toggleUserStatus('${user.id}', ${user.is_active})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>` : ''}
+                ${user.id && !isSelf ? `<button class="action-btn danger" onclick="deleteItem('users', '${user.id}', 'user')">Удалить</button>` : ''}
+                ${user.id && !isSelf ? `<button class="action-btn secondary" onclick="toggleUserStatus('${user.id}', ${user.is_active})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>` : ''}
             </td>
-        </tr>
-    `).join('');
+        </tr>`;
+    }).join('');
 }
 
 async function handleUserInvite(e) {

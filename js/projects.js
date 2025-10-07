@@ -18,15 +18,14 @@ function renderProjects(projects) {
     if (!container) return;
     
     if (!projects || projects.length === 0) {
-        container.innerHTML = '<tr><td colspan="6" style="text-align: center;">Проектов нет</td></tr>';
+        container.innerHTML = '<tr><td colspan="5" style="text-align: center;">Проектов нет</td></tr>';
         return;
     }
     
     container.innerHTML = projects.map(project => `
         <tr>
-            <td>${project.id}</td>
             <td>${project.title}</td>
-            <td>${project.image_url ? `<img src="${project.image_url}" alt="${project.title}" style="max-width: 80px; max-height: 60px; border-radius: 4px;">` : 'Нет'}</td>
+            <td>${project.image_url ? `<img src="${toAbsoluteUrl(project.image_url)}" alt="${project.title}" style="max-width: 80px; max-height: 60px; border-radius: 4px;">` : 'Нет'}</td>
             <td><span class="status-badge ${project.is_active ? 'status-published' : 'status-draft'}">${project.is_active ? 'Активен' : 'Неактивен'}</span></td>
             <td>${project.category || 'Не указана'}</td>
             <td class="actions">
@@ -50,7 +49,7 @@ async function handleProjectCreate(e) {
     const keywordsRaw = (document.getElementById('project-keywords')?.value || '').trim();
     const imageFile = document.getElementById('project-image')?.files?.[0];
 
-    if (!title || !content || !teaser || !theme || !category || !activeEl || !keywordsRaw || !imageFile) {
+    if (!title || !content || !teaser || !activeEl || !keywordsRaw || !imageFile) {
         showNotification('Заполните все обязательные поля, включая изображение и активность.', 'error');
         return;
     }

@@ -67,7 +67,7 @@ function showAnswerForm(id, email) {
             const res = await makeAuthRequest(`/api/feedbacks/${id}/answer/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ response: text })
+                body: JSON.stringify({ response: text, answer: text })
             });
             if (res.ok) {
                 showNotification('Ответ отправлен', 'success');
