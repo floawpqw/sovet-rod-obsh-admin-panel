@@ -24,6 +24,7 @@ function renderUsers(users) {
     
     container.innerHTML = users.map(user => {
         const isSelf = window.currentUser && (String(window.currentUser.id) === String(user.id));
+        const isAdmin = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.is_admin === true);
         return `
         <tr>
             <td>${user.username || 'Не указано'}</td>
@@ -67,6 +68,15 @@ async function handleUserInvite(e) {
 
 async function toggleUserStatus(id, currentStatus) {
     try {
+        // предотвращаем само-деактивацию
+        try {
+            const me = window.currentUser || null;
+            if (me && String(me.id) === String(id)) {
+                showNotification('Нельзя деактивировать свой аккаунт', 'error');
+                return;
+            }
+        } catch (_) {}
+
         const path = currentStatus ? `/api/users/${id}/deactivate/` : `/api/users/${id}/activate/`;
         const method = currentStatus ? 'DELETE' : 'PATCH';
         const response = await makeAuthRequest(path, { method });

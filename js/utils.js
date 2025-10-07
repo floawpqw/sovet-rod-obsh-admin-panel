@@ -317,6 +317,28 @@ function applyRoleUI(user) {
                 const li = usersNavLink.closest('li');
                 if (li) li.style.display = 'none';
                 if (usersSection) usersSection.style.display = 'none';
+
+                // если активной была секция пользователей — переключить на доступную вкладку
+                const activeLink = document.querySelector('.nav-links a.nav-link.active');
+                const activeUsers = activeLink && activeLink.getAttribute('href') === '#users';
+                const usersActive = usersSection && usersSection.classList.contains('active');
+                if (activeUsers || usersActive) {
+                    if (activeLink) activeLink.classList.remove('active');
+                    if (usersSection) usersSection.classList.remove('active');
+
+                    // приоритет: Новости -> Личный кабинет -> первый доступный линк
+                    let fallback = document.querySelector('a.nav-link[href="#news"]');
+                    if (!fallback) fallback = document.querySelector('a.nav-link[href="#profile"]');
+                    if (!fallback) fallback = document.querySelector('.nav-links a.nav-link');
+                    if (fallback) {
+                        fallback.classList.add('active');
+                        const targetId = (fallback.getAttribute('href') || '').replace('#', '');
+                        const targetSection = document.getElementById(targetId);
+                        if (targetSection) targetSection.classList.add('active');
+                        // подгрузить данные, если возможно
+                        if (targetId === 'news' && typeof loadNews === 'function') loadNews();
+                    }
+                }
             } else {
                 const li = usersNavLink.closest('li');
                 if (li) li.style.display = '';

@@ -154,6 +154,15 @@ function getDeletePathByType(type, id) {
 }
 
 async function deleteItem(endpoint, id, type) {
+    // предотвращаем самоудаление администратора
+    try {
+        const me = window.currentUser || null;
+        if (type === 'user' && me && String(me.id) === String(id)) {
+            showNotification('Нельзя удалить свой аккаунт', 'error');
+            return false;
+        }
+    } catch (_) {}
+
     if (!confirm(`Вы уверены, что хотите удалить этот ${getTypeName(type)}?`)) return false;
     const path = getDeletePathByType(type, id);
     if (!path) {
