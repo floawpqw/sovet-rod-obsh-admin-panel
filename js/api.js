@@ -32,10 +32,11 @@ async function makeAuthRequest(url, options = {}) {
             ...options,
             headers
         });
-        if (response.status !== 401) {
+        // Try refresh on 401, and also on specific 400 for auth-check endpoint
+        if (response.status !== 401 && !(response.status === 400 && typeof url === 'string' && url.startsWith('/api/users/me/'))) {
             return response;
         }
-        // 401: try refresh once
+        // 401 or auth-check 400: try refresh once
         const didRefresh = await refreshAccessToken();
         if (didRefresh) {
             const retryHeaders = {

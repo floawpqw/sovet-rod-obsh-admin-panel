@@ -149,5 +149,5 @@ async function editPoll(id) {
 }
 
 // Глобальные функции
-window.viewPollResults = viewPollResults;
+window.viewPollResults = showPollResultsModal;
 window.editPoll = editPoll;
