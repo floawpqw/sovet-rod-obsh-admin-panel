@@ -43,12 +43,8 @@ async function handleNewsCreate(e) {
     const newsUrl = document.getElementById('news-content').value.trim();
     const imageFile = document.getElementById('news-image').files[0];
     const minText = (document.getElementById('news-min-text')?.value || '').trim();
-<<<<<<< HEAD
     const newsDateInput = (document.getElementById('news-date')?.value || '').trim();
     const newsDate = newsDateInput ? new Date(newsDateInput).toISOString().substring(0,10) : new Date().toISOString().substring(0,10);
-=======
-    const newsDate = new Date().toISOString().substring(0,10);
->>>>>>> f2dce32861d0a839a91db714bc138bd0f31f8ba2
 
     if (!title || !newsUrl || !minText || !imageFile) {
         showNotification('Заполните заголовок, содержание и прикрепите изображение.', 'error');
@@ -74,34 +70,6 @@ async function handleNewsCreate(e) {
     const keywords = keywordsRaw ? keywordsRaw.split(',').map(k => k.trim()).filter(Boolean) : [];
     if (keywords.length === 0) {
         showNotification('Укажите хотя бы одно ключевое слово', 'error');
-<<<<<<< HEAD
-=======
-        return;
-    }
-    // Получаем id типа по названию (создаем, если нет)
-    let typeId = null;
-    try {
-        const typesRes = await makeAuthRequest('/api/news/types/');
-        if (typesRes.ok) {
-            const types = await typesRes.json();
-            const found = (types || []).find(t => String(t.type).toLowerCase() === typeName.toLowerCase());
-            if (found) typeId = found.id;
-        }
-    } catch (_) {}
-    if (!typeId) {
-        const createRes = await makeAuthRequest('/api/news/types/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: typeName })
-        });
-        if (createRes.ok) {
-            const created = await createRes.json();
-            typeId = created.id;
-        }
-    }
-    if (!typeId) {
-        showNotification('Не удалось определить тип новости', 'error');
->>>>>>> f2dce32861d0a839a91db714bc138bd0f31f8ba2
         return;
     }
     formData.append('type_id', typeId);
