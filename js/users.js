@@ -23,7 +23,9 @@ function renderUsers(users) {
     }
     
     container.innerHTML = users.map(user => {
-        const isSelf = window.currentUser && (String(window.currentUser.id) === String(user.id));
+        const userId = (user && (user.id || user._id || user.uuid || user.user_id)) || null;
+        const currentUserId = (window.currentUser && (window.currentUser.id || window.currentUser._id || window.currentUser.uuid || window.currentUser.user_id)) || localStorage.getItem('currentUserId') || null;
+        const isSelf = currentUserId && userId && (String(currentUserId) === String(userId));
         const isAdmin = window.currentUser && (window.currentUser.role === 'admin' || window.currentUser.is_admin === true);
         return `
         <tr>
@@ -33,9 +35,9 @@ function renderUsers(users) {
             <td>${user.role || '—'}</td>
             <td><span class="status-badge ${user.is_active ? 'status-published' : 'status-draft'}">${user.is_active ? 'Активен' : 'Неактивен'}</span></td>
             <td class="actions">
-                ${user.id ? `<button class="action-btn warning" onclick="editUser('${user.id}')">Редактировать</button>` : ''}
-                ${user.id && !isSelf ? `<button class="action-btn danger" onclick="deleteItem('users', '${user.id}', 'user')">Удалить</button>` : ''}
-                ${user.id && !isSelf ? `<button class="action-btn secondary" onclick="toggleUserStatus('${user.id}', ${user.is_active})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>` : ''}
+                ${userId ? `<button class="action-btn warning" onclick="editUser('${userId}')">Редактировать</button>` : ''}
+                ${userId && !isSelf ? `<button class="action-btn danger" onclick="deleteItem('users', '${userId}', 'user')">Удалить</button>` : ''}
+                ${userId && !isSelf ? `<button class="action-btn secondary" onclick="toggleUserStatus('${userId}', ${user.is_active})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>` : ''}
             </td>
         </tr>`;
     }).join('');
