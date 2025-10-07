@@ -41,6 +41,10 @@ async function handleBannerCreate(e) {
     e.preventDefault();
     
     const formData = new FormData();
+<<<<<<< HEAD
+=======
+    // Backend expects title and description, not redirect_url
+>>>>>>> f2dce32861d0a839a91db714bc138bd0f31f8ba2
     formData.append('title', document.getElementById('banner-title').value || '');
     formData.append('description', document.getElementById('banner-description').value || '');
     const countOrder = Number(document.getElementById('banner-position').value || '1');
