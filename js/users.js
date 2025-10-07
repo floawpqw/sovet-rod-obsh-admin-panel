@@ -13,6 +13,42 @@ async function loadUsers() {
     }
 }
 
+function getFirstNonEmpty(values) {
+    for (let i = 0; i < values.length; i++) {
+        const v = values[i];
+        if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+    }
+    return null;
+}
+
+function resolveUserId(obj) {
+    if (!obj || typeof obj !== 'object') return null;
+    const direct = getFirstNonEmpty([
+        obj.id,
+        obj.user_id,
+        obj.userId,
+        obj._id,
+        obj.uuid,
+        obj.uid,
+        obj.guid,
+        obj.pk,
+        obj.ID,
+    ]);
+    if (direct) return direct;
+    const nestedUser = obj.user && typeof obj.user === 'object' ? getFirstNonEmpty([
+        obj.user.id,
+        obj.user.user_id,
+        obj.user._id,
+        obj.user.uuid,
+        obj.user.uid,
+        obj.user.guid,
+        obj.user.pk,
+        obj.user.ID,
+    ]) : null;
+    if (nestedUser) return nestedUser;
+    return null;
+}
+
 function renderUsers(users) {
     const container = document.getElementById('users-list');
     if (!container) return;
@@ -23,7 +59,7 @@ function renderUsers(users) {
     }
     
     container.innerHTML = users.map(user => {
-        const userId = (user && (user.id || user._id || user.uuid || user.user_id)) || null;
+        const userId = resolveUserId(user);
         const currentUserId = (window.currentUser && (window.currentUser.id || window.currentUser._id || window.currentUser.uuid || window.currentUser.user_id)) || localStorage.getItem('currentUserId') || null;
         const isSelf = currentUserId && userId && (String(currentUserId) === String(userId));
 

@@ -175,9 +175,10 @@ button.warning:hover {
     color: var(--text-light);
     font-size: 14px;
     white-space: nowrap;
+    text-decoration: none;
 }
-
-.header-btn:hover {
+.header-btn:hover,
+.header-btn.active {
     background-color: var(--primary-red);
     border-color: var(--primary-red);
 }

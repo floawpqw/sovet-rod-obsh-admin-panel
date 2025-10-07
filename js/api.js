@@ -68,6 +68,12 @@ window.verifyAuth = async function verifyAuth() {
         if (user && typeof applyRoleUI === 'function') {
             applyRoleUI(user);
         }
+        try {
+            if (user && (user.id != null || user.user_id != null)) {
+                const idVal = user.id != null ? user.id : user.user_id;
+                localStorage.setItem('currentUserId', String(idVal));
+            }
+        } catch (_) {}
         return user;
     } catch (_) {
         return null;

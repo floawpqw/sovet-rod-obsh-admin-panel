@@ -30,6 +30,17 @@ function initEventListeners() {
         });
     });
 
+    // Поддержка активного состояния для кнопки Личный кабинет в хедере
+    const headerProfileBtn = document.querySelector('.header-actions .header-btn[href="#profile"]');
+    if (headerProfileBtn) {
+        headerProfileBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Сохраняем hover/active состояние для кнопки Личный кабинет
+            headerProfileBtn.classList.add('active');
+            handleNavigation(headerProfileBtn);
+        });
+    }
+
     // Инициализация типов новостей
     if (typeof loadNewsTypes === 'function') {
         loadNewsTypes();
@@ -292,6 +303,16 @@ function handleNavigation(link) {
     });
     
     const targetId = link.getAttribute('href').substring(1);
+
+    // Сбрасываем active у кнопки Личный кабинет в хедере при переходе на другие секции
+    const headerProfileBtn = document.querySelector('.header-actions .header-btn[href="#profile"]');
+    if (headerProfileBtn) {
+        if (targetId === 'profile') {
+            headerProfileBtn.classList.add('active');
+        } else {
+            headerProfileBtn.classList.remove('active');
+        }
+    }
     const targetSection = document.getElementById(targetId);
     
     if (targetSection) {
