@@ -13,6 +13,42 @@ async function loadUsers() {
     }
 }
 
+function getFirstNonEmpty(values) {
+    for (let i = 0; i < values.length; i++) {
+        const v = values[i];
+        if (v !== undefined && v !== null && String(v).trim() !== '') return v;
+    }
+    return null;
+}
+
+function resolveUserId(obj) {
+    if (!obj || typeof obj !== 'object') return null;
+    const direct = getFirstNonEmpty([
+        obj.id,
+        obj.user_id,
+        obj.userId,
+        obj._id,
+        obj.uuid,
+        obj.uid,
+        obj.guid,
+        obj.pk,
+        obj.ID,
+    ]);
+    if (direct) return direct;
+    const nestedUser = obj.user && typeof obj.user === 'object' ? getFirstNonEmpty([
+        obj.user.id,
+        obj.user.user_id,
+        obj.user._id,
+        obj.user.uuid,
+        obj.user.uid,
+        obj.user.guid,
+        obj.user.pk,
+        obj.user.ID,
+    ]) : null;
+    if (nestedUser) return nestedUser;
+    return null;
+}
+
 function renderUsers(users) {
     const container = document.getElementById('users-list');
     if (!container) return;
@@ -23,7 +59,15 @@ function renderUsers(users) {
     }
     
     container.innerHTML = users.map(user => {
-        const isSelf = window.currentUser && (String(window.currentUser.id) === String(user.id));
+        const userId = resolveUserId(user);
+        const currentUserId = (window.currentUser && (window.currentUser.id || window.currentUser._id || window.currentUser.uuid || window.currentUser.user_id)) || localStorage.getItem('currentUserId') || null;
+        const isSelf = currentUserId && userId && (String(currentUserId) === String(userId));
+
+        const isAdminRole = String(user && user.role != null ? user.role : '').toLowerCase() === 'admin';
+        const editBtn = (userId && isAdminRole) ? `<button class="action-btn warning" onclick="editUser('${String(userId)}')">Редактировать</button>` : '';
+        const deleteBtn = (userId && !isSelf) ? `<button class="action-btn danger" onclick="deleteItem('users', '${String(userId)}', 'user')">Удалить</button>` : '';
+        const toggleBtn = (userId && !isSelf) ? `<button class="action-btn secondary" onclick="toggleUserStatus('${String(userId)}', ${user.is_active ? 'true' : 'false'})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>` : '';
+
         return `
         <tr>
             <td>${user.username || 'Не указано'}</td>
@@ -31,11 +75,7 @@ function renderUsers(users) {
             <td>${user.username || ''}</td>
             <td>${user.role || '—'}</td>
             <td><span class="status-badge ${user.is_active ? 'status-published' : 'status-draft'}">${user.is_active ? 'Активен' : 'Неактивен'}</span></td>
-            <td class="actions">
-                ${user.id ? `<button class="action-btn warning" onclick="editUser('${user.id}')">Редактировать</button>` : ''}
-                ${user.id && !isSelf ? `<button class="action-btn danger" onclick="deleteItem('users', '${user.id}', 'user')">Удалить</button>` : ''}
-                ${user.id && !isSelf ? `<button class="action-btn secondary" onclick="toggleUserStatus('${user.id}', ${user.is_active})">${user.is_active ? 'Деактивировать' : 'Активировать'}</button>` : ''}
-            </td>
+            <td class="actions">${editBtn}${deleteBtn}${toggleBtn}</td>
         </tr>`;
     }).join('');
 }
@@ -67,6 +107,15 @@ async function handleUserInvite(e) {
 
 async function toggleUserStatus(id, currentStatus) {
     try {
+        // предотвращаем само-деактивацию
+        try {
+            const me = window.currentUser || null;
+            if (me && String(me.id) === String(id)) {
+                showNotification('Нельзя деактивировать свой аккаунт', 'error');
+                return;
+            }
+        } catch (_) {}
+
         const path = currentStatus ? `/api/users/${id}/deactivate/` : `/api/users/${id}/activate/`;
         const method = currentStatus ? 'DELETE' : 'PATCH';
         const response = await makeAuthRequest(path, { method });

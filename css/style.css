@@ -170,8 +170,18 @@ button.warning:hover {
 .header-btn {
     background-color: transparent;
     border: 1px solid var(--text-light);
+    color: var(--text-light);
     padding: 8px 12px;
     border-radius: 4px;
+    color: var(--text-light);
+    font-size: 14px;
+    white-space: nowrap;
+    text-decoration: none;
+}
+.header-btn:hover,
+.header-btn.active {
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
 }
 
 .nav-links {
@@ -436,7 +446,8 @@ tr:hover {
     }
     
     .nav-links a,
-    .logout-btn {
+    .logout-btn,
+    .header-btn {
         padding: 6px 8px;
         font-size: 13px;
     }
@@ -461,7 +472,8 @@ tr:hover {
     }
     
     .nav-links a,
-    .logout-btn {
+    .logout-btn,
+    .header-btn {
         padding: 8px 10px;
         font-size: 12px;
         min-width: auto;
@@ -496,7 +508,8 @@ tr:hover {
     }
     
     .nav-links a,
-    .logout-btn {
+    .logout-btn,
+    .header-btn {
         padding: 6px 8px;
         font-size: 11px;
     }
